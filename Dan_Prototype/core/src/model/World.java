@@ -39,6 +39,9 @@ public class World {
 
 	/** Returns a list of blocks that are in the cameras window **/
 	public List<Block> getDrawableBlocks(int width, int height) {
+		List<Block> blocks = new ArrayList<Block>();
+		Block block; // temporary
+		
 		// find leftmost block
 		int x = (int) puffle.getPosition().x - width;
 		// find lowest block
@@ -54,15 +57,9 @@ public class World {
 		int y2 = y + 2 * height;
 
 		// if out of world set to edge of world
-		if (x2 > level.getWidth()) {
-			x2 = level.getWidth() - 1;
-		}
-		if (y2 > level.getHeight()) {
-			y2 = level.getHeight() - 1;
-		}
+		if (x2 > level.getWidth()) x2 = level.getWidth() - 1;
+		if (y2 > level.getHeight()) y2 = level.getHeight() - 1;
 
-		List<Block> blocks = new ArrayList<Block>();
-		Block block;
 		// add blocks within camera window to list
 		for (int col = x; col <= x2; col++) {
 			for (int row = y; row <= y2; row++) {
