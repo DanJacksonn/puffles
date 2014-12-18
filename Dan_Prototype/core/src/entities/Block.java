@@ -15,14 +15,16 @@ public class Block {
 	
 	Vector2 position = new Vector2();
 	Rectangle bounds = new Rectangle();
+	int blockID;
 	boolean breakable;
 	
-	public Block(Vector2 position, boolean breakable) {
+	public Block(Vector2 position, int blockID, boolean breakable) {
 		this.position = position;
 		this.bounds.setX(position.x);
 		this.bounds.setY(position.y);
 		this.bounds.width = SIZE;
 		this.bounds.height = SIZE;
+		this.blockID = blockID;
 		this.breakable = breakable;
 	}
 	
@@ -33,6 +35,10 @@ public class Block {
 	
 	public Vector2 getPosition() {
 		return position;
+	}
+	
+	public int getBlockID() {
+		return blockID;
 	}
 	
 	public boolean isBreakable() {

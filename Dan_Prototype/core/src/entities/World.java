@@ -3,9 +3,7 @@ package entities;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.utils.Array;
 
 public class World {
 
@@ -16,6 +14,7 @@ public class World {
 
 	Level level;
 	Puffle puffle;
+	Inventory inventory;
 
 	public World() {
 		createDemoWorld();
@@ -24,6 +23,7 @@ public class World {
 	public void createDemoWorld() {
 		puffle = new Puffle(new Vector2(1, 2));
 		level = new Level();
+		inventory = new Inventory();
 	}
 
 	/** Returns a list of blocks that are in the cameras window **/
@@ -50,9 +50,9 @@ public class World {
 		if (y2 > level.getHeight()) y2 = level.getHeight() - 1;
 
 		// add blocks within camera window to list
-		for (int col = x; col <= x2; col++) {
-			for (int row = y; row <= y2; row++) {
-				block = level.getBlocks()[col][row];
+		for (int row = x; row <= x2; row++) {
+			for (int col = y; col <= y2; col++) {
+				block = level.getBlocks()[row][col];
 				if (block != null) {
 					blocks.add(block);
 				}
@@ -62,9 +62,17 @@ public class World {
 		return blocks;
 	}
 	
+	public void addBlock(int selectedX, int selectedY, int blockID) {
+		level.addBlock(selectedX, selectedY, blockID);
+	}
+	
 	// Getters --------------------
 	public Puffle getPuffle() {
 		return puffle;
+	}
+	
+	public Inventory getInventory() {
+		return inventory;
 	}
 
 	public Level getLevel() {

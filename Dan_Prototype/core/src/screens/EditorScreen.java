@@ -9,16 +9,16 @@ import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
 import com.mygdx.puffles.Puffles;
 
-import controllers.PuffleController;
+import controllers.EditorController;
 import entities.World;
 
-public class GameScreen implements Screen, InputProcessor {
+public class EditorScreen implements Screen, InputProcessor {
 
 	/**
 	 * This class controls processes whilst the game is running. 
 	 * -Renders the world to the screen and processes inputs.
 	 */
-	
+
 	Puffles puffles;
 	private World world;
 	
@@ -26,10 +26,10 @@ public class GameScreen implements Screen, InputProcessor {
 	private WorldRenderer renderer;
 	
 	// processes inputs and character movement
-	private PuffleController controller;
+	private EditorController controller;
 
-	public GameScreen(Puffles puffles) {
-		this.puffles = puffles;
+	public EditorScreen(Puffles game) {
+		this.puffles = game;
 		this.world = new World();
 	}
 	
@@ -40,9 +40,9 @@ public class GameScreen implements Screen, InputProcessor {
 	@Override
 	/** Called when this screen becomes the current screen for the game **/
 	public void show() {
-		System.out.println("GAME MODE");
-		renderer = new WorldRenderer(world, false);
-		controller = new PuffleController(world);
+		System.out.println("EDITING MODE");
+		renderer = new WorldRenderer(world, true);
+		controller = new EditorController(world);
 		// set this screen as current input processor
 		Gdx.input.setInputProcessor(this);
 	}
@@ -97,12 +97,14 @@ public class GameScreen implements Screen, InputProcessor {
 		if (keycode == Keys.RIGHT)
 			controller.rightPressed();
 		if (keycode == Keys.UP)
-			controller.jumpPressed();
+			controller.upPressed();
 		if (keycode == Keys.DOWN)
-			controller.stopPressed();
+			controller.downPressed();
+		if (keycode == Keys.B)
+			controller.backPressed();
 		if (keycode == Keys.E) {
-			puffles.editorScreen.updateWorld(world);
-			puffles.setScreen(puffles.editorScreen);
+			puffles.gameScreen.updateWorld(world);
+			puffles.setScreen(puffles.gameScreen);
 		}
 		return true;
 	}
@@ -115,9 +117,11 @@ public class GameScreen implements Screen, InputProcessor {
 		if (keycode == Keys.RIGHT)
 			controller.rightReleased();
 		if (keycode == Keys.UP)
-			controller.jumpReleased();
+			controller.upReleased();
 		if (keycode == Keys.DOWN)
-			controller.stopReleased();
+			controller.downReleased();
+		if (keycode == Keys.B)
+			controller.backReleased();
 		return true;
 	}
 
@@ -129,15 +133,16 @@ public class GameScreen implements Screen, InputProcessor {
 
 	@Override
 	public boolean touchDown(int screenX, int screenY, int pointer, int button) {
-		// screen touched- jump!
-		controller.jumpPressed();
+		float ppu = renderer.getPpu();
+		int selectedX = (int)Math.floor(screenX / ppu);	
+		int selectedY = (int)Math.floor((renderer.getScreenHeight() - screenY) / ppu);
+		controller.placePressed(selectedX, selectedY);
 		return true;
 	}
 
 	@Override
 	public boolean touchUp(int screenX, int screenY, int pointer, int button) {
-		// screen not being touched- stop jumping
-		controller.jumpReleased();
+		controller.placeReleased();
 		return false;
 	}
 
@@ -160,3 +165,4 @@ public class GameScreen implements Screen, InputProcessor {
 	}
 
 }
+

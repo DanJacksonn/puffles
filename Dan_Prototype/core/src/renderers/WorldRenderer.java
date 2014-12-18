@@ -22,21 +22,24 @@ public class WorldRenderer {
 	public static final float CAMERA_HEIGHT = 10f;
 
 	private World world;
+	private boolean editing;
 
 	// allows the camera to only render part of the world
 	private OrthographicCamera cam;
 
 	// textures
 	private TextureRegion puffleTexture;
-	private TextureRegion grassTexture;
+	private TextureRegion[] blockTextures;
 	private SpriteBatch spriteBatch;
 
 	private float ppu; // pixels per unit
 	private float cameraHeight;
 	private float cameraWidth;
+	private int screenHeight;
 
-	public WorldRenderer(World world) {
+	public WorldRenderer(World world, boolean editing) {
 		this.world = world;
+		this.editing = editing;
 
 		// set view port size
 		this.cam = new OrthographicCamera(cameraWidth, CAMERA_HEIGHT);
@@ -46,11 +49,14 @@ public class WorldRenderer {
 		
 		spriteBatch = new SpriteBatch();
 		this.cameraHeight = CAMERA_HEIGHT;
+		
+		blockTextures = new TextureRegion[2];
 		loadTextures();
 	}
 	
 	/** Scales the size of the camera to the size of the screen */
 	public void setSize(int screenWidth, int screenHeight) {
+		this.screenHeight = screenHeight;
 		// calculate number of pixels per unit
 		ppu = screenHeight / cameraHeight;
 		this.cameraWidth = screenWidth / ppu;
@@ -61,13 +67,17 @@ public class WorldRenderer {
 		TextureAtlas atlas = new TextureAtlas(
 				Gdx.files.internal("images/textures/tileset.pack"));
 		puffleTexture = atlas.findRegion("player");
-		grassTexture = atlas.findRegion("grass");
+		blockTextures[0] = atlas.findRegion("rock");
+		blockTextures[1] = atlas.findRegion("grass");
 	}
 
 	public void render() {
 		spriteBatch.begin();
 		drawBlocks();
 		drawPuffle();
+		if (editing) {
+			drawEditor();
+		}
 		spriteBatch.end();
 	}
 
@@ -75,7 +85,7 @@ public class WorldRenderer {
 		for (Block block : world.getDrawableBlocks((int)cameraWidth, (int)CAMERA_HEIGHT)) {
 			float blockSize = Block.SIZE * ppu;
 			// draw block to screen
-			spriteBatch.draw(grassTexture, block.getPosition().x * ppu,
+			spriteBatch.draw(blockTextures[block.getBlockID()], block.getPosition().x * ppu,
 					block.getPosition().y * ppu, blockSize, blockSize);
 		}
 	}
@@ -87,5 +97,17 @@ public class WorldRenderer {
 		spriteBatch.draw(puffleTexture, puffle.getPosition().x * ppu,
 				puffle.getPosition().y * ppu, puffleSize / 2, puffleSize / 2,
 				puffleSize, puffleSize, 1f, 1f, puffle.getRotation(), true);
+	}
+	
+	private void drawEditor() {
+		
+	}
+	
+	public float getPpu() {
+		return ppu;
+	}
+	
+	public int getScreenHeight() {
+		return screenHeight;
 	}
 }

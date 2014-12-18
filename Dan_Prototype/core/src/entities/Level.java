@@ -19,29 +19,33 @@ public class Level {
 
 	public void loadDemoLevel() {
 		width = 15;
-		height = 8;
+		height = 10;
 		blocks = new Block[width][height];
 
 		// fill level with empty blocks
-		for (int col = 0; col < width; col++) {
-			for (int row = 0; row < height; row++) {
-				blocks[col][row] = null;
+		for (int row = 0; row < width; row++) {
+			for (int col = 0; col < height; col++) {
+				blocks[row][col] = null;
 			}
 		}
 
 		// add blocks
-		for (int col = 0; col < width; col++) {
-			if (col != 5 && col != 6) {
-				blocks[col][0] = new Block(new Vector2(col, 0), false);
-				blocks[col][1] = new Block(new Vector2(col, 1), false);
-				if (col > 2 && col != 9) {
-					blocks[col][2] = new Block(new Vector2(col, 2), false);
+		for (int row = 0; row < width; row++) {
+			if (row != 5 && row != 6) {
+				blocks[row][0] = new Block(new Vector2(row, 0), 0, false);
+				blocks[row][1] = new Block(new Vector2(row, 1), 0, false);
+				if (row > 2 && row != 9) {
+					blocks[row][2] = new Block(new Vector2(row, 2), 0, false);
 				}
-				if (col > 9) {
-				blocks[col][3] = new Block(new Vector2(col, 3), false);
+				if (row > 9) {
+				blocks[row][3] = new Block(new Vector2(row, 3), 0, false);
 				}
 			}
 		}
+	}
+	
+	public void addBlock(int row, int col, int blockID) {
+		blocks[row][col] = new Block(new Vector2(row, col), blockID, false);
 	}
 	
 	// Getters -----------
@@ -57,8 +61,12 @@ public class Level {
 		return blocks;
 	}
 
-	public Block getBlock(int x, int y) {
-		return blocks[x][y];
+	public Block getBlock(int row, int col) {
+		return blocks[row][col];
+	}
+	
+	public boolean isEmpty(int row, int col) {
+		return blocks[row][col] == null;
 	}
 
 	// --------------------

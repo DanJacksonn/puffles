@@ -26,11 +26,11 @@ public class PuffleController {
 	}
 
 	// horizontal vectors
-	private static final float ROLL_ACCELERATION = 10f;
-	private static final float ROLL_SPEED = 3f;
+	private static final float ROLL_ACCELERATION = 11f;
+	private static final float ROLL_SPEED = 2.6f;
 	private static final float FRICTION = 0.9f;
 	// vertical vectors
-	private static final float GRAVITY = -28f;
+	private static final float GRAVITY = -30f;
 	private static final float JUMP_SPEED = 9f;
 
 	private World world;
@@ -59,40 +59,6 @@ public class PuffleController {
 		this.world = world;
 		this.puffle = world.getPuffle();
 	}
-
-	// Events ----------------
-	public void leftPressed() {
-		keys.get(keys.put(Keys.LEFT, true));
-	}
-
-	public void rightPressed() {
-		keys.get(keys.put(Keys.RIGHT, true));
-	}
-
-	public void stopPressed() {
-		keys.get(keys.put(Keys.STOP, true));
-	}
-
-	public void jumpPressed() {
-		keys.get(keys.put(Keys.JUMP, true));
-	}
-
-	public void leftReleased() {
-		keys.get(keys.put(Keys.LEFT, false));
-	}
-
-	public void rightReleased() {
-		keys.get(keys.put(Keys.RIGHT, false));
-	}
-
-	public void stopReleased() {
-		keys.get(keys.put(Keys.STOP, false));
-	}
-
-	public void jumpReleased() {
-		keys.get(keys.put(Keys.JUMP, false));
-	}
-	// -------------------------
 
 	public void update(float delta) {
 		processInput();
@@ -226,6 +192,40 @@ public class PuffleController {
 			}
 		}
 	}
+	
+	// Events ----------------
+		public void leftPressed() {
+			keys.get(keys.put(Keys.LEFT, true));
+		}
+
+		public void rightPressed() {
+			keys.get(keys.put(Keys.RIGHT, true));
+		}
+
+		public void stopPressed() {
+			keys.get(keys.put(Keys.STOP, true));
+		}
+
+		public void jumpPressed() {
+			keys.get(keys.put(Keys.JUMP, true));
+		}
+
+		public void leftReleased() {
+			keys.get(keys.put(Keys.LEFT, false));
+		}
+
+		public void rightReleased() {
+			keys.get(keys.put(Keys.RIGHT, false));
+		}
+
+		public void stopReleased() {
+			keys.get(keys.put(Keys.STOP, false));
+		}
+
+		public void jumpReleased() {
+			keys.get(keys.put(Keys.JUMP, false));
+		}
+		// -------------------------
 
 	private boolean processInput() {
 		// if jump key is pressed
