@@ -3,6 +3,12 @@ package controllers;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.utils.Array;
+import com.mygdx.puffles.Puffles;
+
+import entities.Block;
+import entities.Editor;
 import entities.Inventory;
 import entities.World;
 
@@ -17,11 +23,12 @@ public class EditorController {
 		LEFT, RIGHT, UP, DOWN, PLACE, BACK
 	}
 
+	Puffles game;
 	private World world;
 	private Inventory inventory;
+	private Editor editor;
 	
-	int selectedX;
-	int selectedY;
+	Vector2 selectedBlock;
 
 	static Map<Keys, Boolean> keys = new HashMap<EditorController.Keys, Boolean>();
 	static {
@@ -33,11 +40,12 @@ public class EditorController {
 		keys.put(Keys.BACK, false);
 	};
 
-	public EditorController(World world) {
+	public EditorController(Puffles game, World world, Editor editor) {
+		this.game = game;
 		this.world = world;
 		this.inventory = world.getInventory();
-		this.selectedX = 0;
-		this.selectedY = 0;
+		this.editor = editor;
+		selectedBlock = new Vector2();
 	}
 	
 	public void update(float delta) {
@@ -66,8 +74,7 @@ public class EditorController {
 	
 	public void placePressed(int selectedX, int selectedY) {
 		keys.get(keys.put(Keys.PLACE, true));
-		this.selectedX = selectedX;
-		this.selectedY = selectedY;
+		selectedBlock.set(selectedX, selectedY);
 	}
 	
 	public void backPressed() {
@@ -85,30 +92,35 @@ public class EditorController {
 	public void upReleased() {
 		keys.get(keys.put(Keys.UP, false));
 	}
-
-	public void downReleased() {
-		keys.get(keys.put(Keys.DOWN, false));
-	}
 	
-	public void placeReleased() {
-		keys.get(keys.put(Keys.PLACE, false));
-	}
-	
-	public void backReleased() {
-		keys.get(keys.put(Keys.BACK, false));
-	}
 	// -------------------------
 
 	private boolean processInput() {
 		// if left key is pressed
 		if (keys.get(Keys.PLACE)) {
-			if (world.getLevel().isEmpty(selectedX, selectedY) && inventory.getNoOfBlocks() > 0) {
-				world.addBlock(selectedX, selectedY, 1);
+			if (placeable()) {
+				// place block
+				editor.placeBlock(new Block(new Vector2(selectedBlock.x, selectedBlock.y), 1, false));
 				inventory.removeBlock();
-				keys.get(keys.put(Keys.PLACE, false));
 			}
+			keys.get(keys.put(Keys.PLACE, false));
+		} else if (keys.get(Keys.BACK)) {
+			keys.get(keys.put(Keys.BACK, false));
+			// add placed blocks to the world
+			world.addBlocks(editor.getPlacedBlocks());
+			// update the game world
+			game.gameScreen.updateWorld(world);
+			// resume game
+			game.setScreen(game.gameScreen);
 		}
 		return false;
+	}
+	
+	private boolean placeable() {
+		if (!world.getLevel().isEmpty(selectedBlock)) return false;
+		if (inventory.isEmpty()) return false;
+		if (editor.isBlockPlacedAt(selectedBlock)) return false;
+		return true;
 	}
 	
 }

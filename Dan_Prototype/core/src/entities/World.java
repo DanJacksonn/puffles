@@ -4,12 +4,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.utils.Array;
 
 public class World {
 
 	/**
 	 * This class represents the current game world. 
-	 * -Every world has a level and a player.
+	 * -Every world has a level, a player and an inventory.
 	 */
 
 	Level level;
@@ -62,8 +63,10 @@ public class World {
 		return blocks;
 	}
 	
-	public void addBlock(int selectedX, int selectedY, int blockID) {
-		level.addBlock(selectedX, selectedY, blockID);
+	public void addBlocks(Array<Block> blocks) {
+		for (Block block : blocks) {
+			level.addBlock(block);
+		}
 	}
 	
 	// Getters --------------------

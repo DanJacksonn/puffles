@@ -10,6 +10,7 @@ import com.badlogic.gdx.graphics.GL20;
 import com.mygdx.puffles.Puffles;
 
 import controllers.EditorController;
+import entities.Editor;
 import entities.World;
 
 public class EditorScreen implements Screen, InputProcessor {
@@ -19,8 +20,9 @@ public class EditorScreen implements Screen, InputProcessor {
 	 * -Renders the world to the screen and processes inputs.
 	 */
 
-	Puffles puffles;
+	Puffles game;
 	private World world;
+	private Editor editor;
 	
 	// draws world to the screen
 	private WorldRenderer renderer;
@@ -29,8 +31,9 @@ public class EditorScreen implements Screen, InputProcessor {
 	private EditorController controller;
 
 	public EditorScreen(Puffles game) {
-		this.puffles = game;
+		this.game = game;
 		this.world = new World();
+		this.editor = new Editor(true);
 	}
 	
 	public void updateWorld(World world) {
@@ -40,9 +43,8 @@ public class EditorScreen implements Screen, InputProcessor {
 	@Override
 	/** Called when this screen becomes the current screen for the game **/
 	public void show() {
-		System.out.println("EDITING MODE");
-		renderer = new WorldRenderer(world, true);
-		controller = new EditorController(world);
+		renderer = new WorldRenderer(world, editor);
+		controller = new EditorController(game, world, editor);
 		// set this screen as current input processor
 		Gdx.input.setInputProcessor(this);
 	}
@@ -92,36 +94,28 @@ public class EditorScreen implements Screen, InputProcessor {
 	@Override
 	public boolean keyDown(int keycode) {
 		// keyboard key pressed
-		if (keycode == Keys.LEFT)
+		if (keycode == Keys.A)
 			controller.leftPressed();
-		if (keycode == Keys.RIGHT)
+		if (keycode == Keys.D)
 			controller.rightPressed();
-		if (keycode == Keys.UP)
+		if (keycode == Keys.W)
 			controller.upPressed();
-		if (keycode == Keys.DOWN)
+		if (keycode == Keys.S)
 			controller.downPressed();
-		if (keycode == Keys.B)
+		if (keycode == Keys.E)
 			controller.backPressed();
-		if (keycode == Keys.E) {
-			puffles.gameScreen.updateWorld(world);
-			puffles.setScreen(puffles.gameScreen);
-		}
 		return true;
 	}
 
 	@Override
 	public boolean keyUp(int keycode) {
 		// keyboard key released
-		if (keycode == Keys.LEFT)
+		if (keycode == Keys.A)
 			controller.leftReleased();
-		if (keycode == Keys.RIGHT)
+		if (keycode == Keys.D)
 			controller.rightReleased();
-		if (keycode == Keys.UP)
+		if (keycode == Keys.W)
 			controller.upReleased();
-		if (keycode == Keys.DOWN)
-			controller.downReleased();
-		if (keycode == Keys.B)
-			controller.backReleased();
 		return true;
 	}
 
@@ -133,16 +127,18 @@ public class EditorScreen implements Screen, InputProcessor {
 
 	@Override
 	public boolean touchDown(int screenX, int screenY, int pointer, int button) {
+		// convert mouse coordinates to unit coordinates
 		float ppu = renderer.getPpu();
 		int selectedX = (int)Math.floor(screenX / ppu);	
 		int selectedY = (int)Math.floor((renderer.getScreenHeight() - screenY) / ppu);
+		
 		controller.placePressed(selectedX, selectedY);
 		return true;
 	}
 
 	@Override
 	public boolean touchUp(int screenX, int screenY, int pointer, int button) {
-		controller.placeReleased();
+		// TODO Auto-generated method stub
 		return false;
 	}
 

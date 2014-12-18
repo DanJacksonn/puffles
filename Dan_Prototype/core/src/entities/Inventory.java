@@ -2,16 +2,15 @@ package entities;
 
 public class Inventory {
 	
+	/**
+	 * This class stores items in the player's inventory.
+	 */
+	
 	public static final float MAX_BLOCKS = 10;
-	int noOfBlocks
-	;
+	int noOfBlocks;
 	
 	public Inventory() {
 		this.noOfBlocks = 10;
-	}
-	
-	public int getNoOfBlocks() {
-		return noOfBlocks;
 	}
 	
 	public void addBlock() {
@@ -21,4 +20,12 @@ public class Inventory {
 	public void removeBlock() {
 		noOfBlocks -= 1;
 	}
+	
+	// Getters ------------
+	public boolean isEmpty() {
+		return noOfBlocks == 0;
+	}
+	
+	// --------------------
+
 }

@@ -10,6 +10,7 @@ import com.badlogic.gdx.graphics.GL20;
 import com.mygdx.puffles.Puffles;
 
 import controllers.PuffleController;
+import entities.Editor;
 import entities.World;
 
 public class GameScreen implements Screen, InputProcessor {
@@ -19,8 +20,9 @@ public class GameScreen implements Screen, InputProcessor {
 	 * -Renders the world to the screen and processes inputs.
 	 */
 	
-	Puffles puffles;
+	Puffles game;
 	private World world;
+	private Editor editor;
 	
 	// draws world to the screen
 	private WorldRenderer renderer;
@@ -29,8 +31,9 @@ public class GameScreen implements Screen, InputProcessor {
 	private PuffleController controller;
 
 	public GameScreen(Puffles puffles) {
-		this.puffles = puffles;
+		this.game = puffles;
 		this.world = new World();
+		this.editor = new Editor(false);
 	}
 	
 	public void updateWorld(World world) {
@@ -40,9 +43,8 @@ public class GameScreen implements Screen, InputProcessor {
 	@Override
 	/** Called when this screen becomes the current screen for the game **/
 	public void show() {
-		System.out.println("GAME MODE");
-		renderer = new WorldRenderer(world, false);
-		controller = new PuffleController(world);
+		renderer = new WorldRenderer(world, editor);
+		controller = new PuffleController(game, world);
 		// set this screen as current input processor
 		Gdx.input.setInputProcessor(this);
 	}
@@ -92,17 +94,14 @@ public class GameScreen implements Screen, InputProcessor {
 	@Override
 	public boolean keyDown(int keycode) {
 		// keyboard key pressed
-		if (keycode == Keys.LEFT)
+		if (keycode == Keys.A)
 			controller.leftPressed();
-		if (keycode == Keys.RIGHT)
+		if (keycode == Keys.D)
 			controller.rightPressed();
-		if (keycode == Keys.UP)
+		if (keycode == Keys.W)
 			controller.jumpPressed();
-		if (keycode == Keys.DOWN)
-			controller.stopPressed();
 		if (keycode == Keys.E) {
-			puffles.editorScreen.updateWorld(world);
-			puffles.setScreen(puffles.editorScreen);
+			controller.editPressed(game);
 		}
 		return true;
 	}
@@ -110,14 +109,12 @@ public class GameScreen implements Screen, InputProcessor {
 	@Override
 	public boolean keyUp(int keycode) {
 		// keyboard key released
-		if (keycode == Keys.LEFT)
+		if (keycode == Keys.A)
 			controller.leftReleased();
-		if (keycode == Keys.RIGHT)
+		if (keycode == Keys.D)
 			controller.rightReleased();
-		if (keycode == Keys.UP)
+		if (keycode == Keys.W)
 			controller.jumpReleased();
-		if (keycode == Keys.DOWN)
-			controller.stopReleased();
 		return true;
 	}
 

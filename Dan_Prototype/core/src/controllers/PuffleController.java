@@ -1,14 +1,18 @@
 package controllers;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
+import com.badlogic.gdx.Game;
 import com.badlogic.gdx.math.Circle;
 import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
+import com.mygdx.puffles.Puffles;
 
+import controllers.EditorController.Keys;
 import entities.Block;
 import entities.Puffle;
 import entities.World;
@@ -17,12 +21,12 @@ import entities.Puffle.State;
 public class PuffleController {
 
 	/**
-	 * This class controls the puffle's movement.
+	 * This class controls the puffle's movement. 
 	 * -Reacts to particular keys being pressed.
 	 */
-	
+
 	enum Keys {
-		LEFT, RIGHT, STOP, JUMP
+		LEFT, RIGHT, JUMP, EDIT
 	}
 
 	// horizontal vectors
@@ -30,9 +34,10 @@ public class PuffleController {
 	private static final float ROLL_SPEED = 2.6f;
 	private static final float FRICTION = 0.9f;
 	// vertical vectors
-	private static final float GRAVITY = -30f;
+	private static final float GRAVITY = -29f;
 	private static final float JUMP_SPEED = 9f;
 
+	private Puffles game;
 	private World world;
 	private Puffle puffle;
 	private boolean grounded = false;
@@ -45,19 +50,16 @@ public class PuffleController {
 		}
 	};
 
-	private Array<Block> collidableBlocks = new Array<Block>();
+	private Array<Block> collidableBlocks;
 
 	static Map<Keys, Boolean> keys = new HashMap<PuffleController.Keys, Boolean>();
-	static {
-		keys.put(Keys.LEFT, false);
-		keys.put(Keys.RIGHT, false);
-		keys.put(Keys.STOP, false);
-		keys.put(Keys.JUMP, false);
-	};
 
-	public PuffleController(World world) {
+	public PuffleController(Puffles game, World world) {
+		this.game = game;
 		this.world = world;
 		this.puffle = world.getPuffle();
+		collidableBlocks = new Array<Block>();
+		resetKeys();
 	}
 
 	public void update(float delta) {
@@ -67,10 +69,10 @@ public class PuffleController {
 			// stop jumping when grounded
 			puffle.setJumping(false);
 		}
-		
+
 		// set initial vertical acceleration
 		puffle.setYAcceleration(GRAVITY);
-		
+
 		// scale acceleration to time frame units
 		puffle.scaleAccleration(delta);
 
@@ -79,7 +81,7 @@ public class PuffleController {
 				puffle.getAcceleration().y);
 
 		checkCollisionWithBlocks(delta);
-		
+
 		// apply friction when not accelerating
 		if (puffle.getAcceleration().x == 0) {
 			puffle.scaleVelocity(FRICTION, 1);
@@ -99,7 +101,7 @@ public class PuffleController {
 	private void checkCollisionWithBlocks(float delta) {
 		Rectangle puffleRect;
 		int x1, x2, y1, y2;
-		
+
 		// scale velocity to time frame units
 		puffle.scaleVelocity(delta);
 
@@ -129,7 +131,7 @@ public class PuffleController {
 
 		// simulate horizontal movement
 		puffleRect.x += puffle.getVelocity().x;
-		
+
 		// if puffle collides then change direction
 		for (Block block : collidableBlocks) {
 			if (block != null && puffleRect.overlaps(block.getBounds())) {
@@ -155,17 +157,18 @@ public class PuffleController {
 			y1 = y2 = (int) Math.floor(puffle.getBounds().y
 					+ puffle.getBounds().height + puffle.getVelocity().y);
 		}
-		
+
 		// store all blocks the puffle can collide with
 		findCollidableBlocks(x1, y1, x2, y2);
-		
+
 		// simulate vertical movement
 		puffleRect.y += puffle.getVelocity().y;
 
 		// if puffle collides stop vertical movement
 		for (Block block : collidableBlocks) {
 			if (block != null && puffleRect.overlaps(block.getBounds())) {
-				if (puffle.getVelocity().y < 0) grounded = true;
+				if (puffle.getVelocity().y < 0)
+					grounded = true;
 				puffle.setYVelocity(0);
 				break;
 			}
@@ -192,68 +195,76 @@ public class PuffleController {
 			}
 		}
 	}
-	
+
 	// Events ----------------
-		public void leftPressed() {
-			keys.get(keys.put(Keys.LEFT, true));
-		}
+	public void leftPressed() {
+		keys.get(keys.put(Keys.LEFT, true));
+	}
 
-		public void rightPressed() {
-			keys.get(keys.put(Keys.RIGHT, true));
-		}
+	public void rightPressed() {
+		keys.get(keys.put(Keys.RIGHT, true));
+	}
 
-		public void stopPressed() {
-			keys.get(keys.put(Keys.STOP, true));
-		}
+	public void jumpPressed() {
+		keys.get(keys.put(Keys.JUMP, true));
+	}
 
-		public void jumpPressed() {
-			keys.get(keys.put(Keys.JUMP, true));
-		}
+	public void editPressed(Puffles game) {
+		keys.get(keys.put(Keys.EDIT, true));
+	}
 
-		public void leftReleased() {
-			keys.get(keys.put(Keys.LEFT, false));
-		}
+	public void leftReleased() {
+		keys.get(keys.put(Keys.LEFT, false));
+	}
 
-		public void rightReleased() {
-			keys.get(keys.put(Keys.RIGHT, false));
-		}
+	public void rightReleased() {
+		keys.get(keys.put(Keys.RIGHT, false));
+	}
 
-		public void stopReleased() {
-			keys.get(keys.put(Keys.STOP, false));
-		}
+	public void jumpReleased() {
+		keys.get(keys.put(Keys.JUMP, false));
+	}
 
-		public void jumpReleased() {
-			keys.get(keys.put(Keys.JUMP, false));
-		}
-		// -------------------------
+	// -------------------------
 
-	private boolean processInput() {
-		// if jump key is pressed
-		if (keys.get(Keys.JUMP)) {
-			// if not already jumping
-			if (!puffle.isJumping()) {
-				// jump
-				puffle.setJumping(true);
-				puffle.setYVelocity(JUMP_SPEED);
-				grounded = false;
+	private void processInput() {
+		if (keys.get(Keys.EDIT)) {
+			resetKeys();
+			game.editorScreen.updateWorld(world);
+			game.setScreen(game.editorScreen);
+		} else {
+
+			if (keys.get(Keys.JUMP)) {
+				// if not already jumping
+				if (!puffle.isJumping()) {
+					// jump
+					puffle.setJumping(true);
+					puffle.setYVelocity(JUMP_SPEED);
+					grounded = false;
+				}
+			}
+
+			if (keys.get(Keys.LEFT)) {
+				// start moving puffle left
+				puffle.setState(State.ROLLING);
+				puffle.setXAcceleration(-ROLL_ACCELERATION);
+			} else if (keys.get(Keys.RIGHT)) {
+				// start moving puffle right
+				puffle.setState(State.ROLLING);
+				puffle.setXAcceleration(ROLL_ACCELERATION);
+			} else {
+				// stop moving
+				puffle.setState(State.STOPPED);
+				puffle.setXAcceleration(0);
 			}
 		}
+	}
 
-		if (keys.get(Keys.LEFT)) {
-			// start moving puffle left
-			puffle.setState(State.ROLLING);
-			puffle.setXAcceleration(-ROLL_ACCELERATION);
-		} else if (keys.get(Keys.RIGHT)) {
-			// start moving puffle right
-			puffle.setState(State.ROLLING);
-			puffle.setXAcceleration(ROLL_ACCELERATION);
-		} else {
-			// stop moving
-			puffle.setState(State.STOPPED);
-			puffle.setXAcceleration(0);
-		}
-
-		return false;
+	private void resetKeys() {
+		keys.put(Keys.LEFT, false);
+		keys.put(Keys.RIGHT, false);
+		keys.put(Keys.JUMP, false);
+		keys.put(Keys.EDIT, false);
 	}
 
 }

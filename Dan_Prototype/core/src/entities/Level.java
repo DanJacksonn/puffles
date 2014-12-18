@@ -44,8 +44,8 @@ public class Level {
 		}
 	}
 	
-	public void addBlock(int row, int col, int blockID) {
-		blocks[row][col] = new Block(new Vector2(row, col), blockID, false);
+	public void addBlock(Block block) {
+		blocks[(int) block.getPosition().x][(int) block.getPosition().y] = block;
 	}
 	
 	// Getters -----------
@@ -65,8 +65,8 @@ public class Level {
 		return blocks[row][col];
 	}
 	
-	public boolean isEmpty(int row, int col) {
-		return blocks[row][col] == null;
+	public boolean isEmpty(Vector2 position) {
+		return blocks[(int) position.x][(int) position.y] == null;
 	}
 
 	// --------------------
