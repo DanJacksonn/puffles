@@ -1,4 +1,4 @@
-package model;
+package entities;
 
 import com.badlogic.gdx.math.Vector2;
 
@@ -6,7 +6,7 @@ public class Level {
 
 	/**
 	 * This class represents a level.
-	 * -A level is an array of blocks.
+	 * A level is an array of blocks.
 	 */
 	
 	private int width;
@@ -17,7 +17,6 @@ public class Level {
 		loadDemoLevel();
 	}
 
-	/** THIS IS TEMPORARY!! **/
 	public void loadDemoLevel() {
 		width = 15;
 		height = 8;
@@ -30,7 +29,7 @@ public class Level {
 			}
 		}
 
-		// add blocks to level
+		// add blocks
 		for (int col = 0; col < width; col++) {
 			if (col != 5 && col != 6) {
 				blocks[col][0] = new Block(new Vector2(col, 0), false);

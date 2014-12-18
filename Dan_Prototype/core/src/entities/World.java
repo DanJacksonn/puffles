@@ -1,4 +1,4 @@
-package model;
+package entities;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,17 +25,6 @@ public class World {
 		puffle = new Puffle(new Vector2(1, 2));
 		level = new Level();
 	}
-
-	// Getters --------------------
-	public Puffle getPuffle() {
-		return puffle;
-	}
-
-	public Level getLevel() {
-		return level;
-	}
-
-	// -----------------------------
 
 	/** Returns a list of blocks that are in the cameras window **/
 	public List<Block> getDrawableBlocks(int width, int height) {
@@ -72,4 +61,15 @@ public class World {
 		
 		return blocks;
 	}
+	
+	// Getters --------------------
+	public Puffle getPuffle() {
+		return puffle;
+	}
+
+	public Level getLevel() {
+		return level;
+	}
+
+	// -----------------------------
 }

@@ -1,7 +1,6 @@
 package screens;
 
-import view.WorldRenderer;
-import model.World;
+import renderers.WorldRenderer;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
@@ -9,7 +8,8 @@ import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
 
-import controller.PuffleController;
+import controllers.PuffleController;
+import entities.World;
 
 public class GameScreen implements Screen, InputProcessor {
 

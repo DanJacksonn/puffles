@@ -1,14 +1,14 @@
-package view;
-
-import model.Block;
-import model.Puffle;
-import model.World;
+package renderers;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+
+import entities.Block;
+import entities.Puffle;
+import entities.World;
 
 public class WorldRenderer {
 
@@ -49,6 +49,7 @@ public class WorldRenderer {
 		loadTextures();
 	}
 	
+	/** Scales the size of the camera to the size of the screen */
 	public void setSize(int screenWidth, int screenHeight) {
 		// calculate number of pixels per unit
 		ppu = screenHeight / cameraHeight;
