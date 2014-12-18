@@ -1,19 +1,15 @@
 package controllers;
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
-import com.badlogic.gdx.Game;
-import com.badlogic.gdx.math.Circle;
-import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import com.mygdx.puffles.Puffles;
 
-import controllers.EditorController.Keys;
 import entities.Block;
+import entities.Level;
 import entities.Puffle;
 import entities.World;
 import entities.Puffle.State;
@@ -31,7 +27,7 @@ public class PuffleController {
 
 	// horizontal vectors
 	private static final float ROLL_ACCELERATION = 11f;
-	private static final float ROLL_SPEED = 2.6f;
+	private static final float ROLL_SPEED = 2.5f;
 	private static final float FRICTION = 0.9f;
 	// vertical vectors
 	private static final float GRAVITY = -29f;
@@ -39,8 +35,12 @@ public class PuffleController {
 
 	private Puffles game;
 	private World world;
+	
+	// world entities
+	private Level level;
 	private Puffle puffle;
-	private boolean grounded = false;
+	
+	private boolean grounded;
 
 	// pool of rectangles can be reused to avoid allocation
 	private Pool<Rectangle> rectPool = new Pool<Rectangle>() {
@@ -57,9 +57,18 @@ public class PuffleController {
 	public PuffleController(Puffles game, World world) {
 		this.game = game;
 		this.world = world;
+		this.level = world.getLevel();
 		this.puffle = world.getPuffle();
+		this.grounded = true;
 		collidableBlocks = new Array<Block>();
 		resetKeys();
+	}
+	
+	private void resetKeys() {
+		keys.put(Keys.LEFT, false);
+		keys.put(Keys.RIGHT, false);
+		keys.put(Keys.JUMP, false);
+		keys.put(Keys.EDIT, false);
 	}
 
 	public void update(float delta) {
@@ -135,6 +144,7 @@ public class PuffleController {
 		// if puffle collides then change direction
 		for (Block block : collidableBlocks) {
 			if (block != null && puffleRect.overlaps(block.getBounds())) {
+				
 				puffle.getVelocity().x *= -1;
 				break;
 			}
@@ -188,9 +198,9 @@ public class PuffleController {
 		for (int x = x1; x <= x2; x++) {
 			for (int y = y1; y <= y2; y++) {
 				// if not outside of world
-				if (x >= 0 && x < world.getLevel().getWidth() && y >= 0
-						&& y < world.getLevel().getHeight()) {
-					collidableBlocks.add(world.getLevel().getBlock(x, y));
+				if (x >= 0 && x < level.getWidth() && y >= 0
+						&& y < level.getHeight()) {
+					collidableBlocks.add(level.getBlock(x, y));
 				}
 			}
 		}
@@ -230,7 +240,9 @@ public class PuffleController {
 	private void processInput() {
 		if (keys.get(Keys.EDIT)) {
 			resetKeys();
+			// update the game world
 			game.editorScreen.updateWorld(world);
+			// switch to edit mode
 			game.setScreen(game.editorScreen);
 		} else {
 
@@ -258,13 +270,6 @@ public class PuffleController {
 				puffle.setXAcceleration(0);
 			}
 		}
-	}
-
-	private void resetKeys() {
-		keys.put(Keys.LEFT, false);
-		keys.put(Keys.RIGHT, false);
-		keys.put(Keys.JUMP, false);
-		keys.put(Keys.EDIT, false);
 	}
 
 }

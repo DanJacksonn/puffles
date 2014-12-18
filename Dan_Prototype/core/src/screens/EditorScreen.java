@@ -11,6 +11,7 @@ import com.mygdx.puffles.Puffles;
 
 import controllers.EditorController;
 import entities.Editor;
+import entities.Level;
 import entities.World;
 
 public class EditorScreen implements Screen, InputProcessor {
@@ -45,6 +46,7 @@ public class EditorScreen implements Screen, InputProcessor {
 	public void show() {
 		renderer = new WorldRenderer(world, editor);
 		controller = new EditorController(game, world, editor);
+		
 		// set this screen as current input processor
 		Gdx.input.setInputProcessor(this);
 	}
@@ -94,14 +96,6 @@ public class EditorScreen implements Screen, InputProcessor {
 	@Override
 	public boolean keyDown(int keycode) {
 		// keyboard key pressed
-		if (keycode == Keys.A)
-			controller.leftPressed();
-		if (keycode == Keys.D)
-			controller.rightPressed();
-		if (keycode == Keys.W)
-			controller.upPressed();
-		if (keycode == Keys.S)
-			controller.downPressed();
 		if (keycode == Keys.E)
 			controller.backPressed();
 		return true;
@@ -109,13 +103,7 @@ public class EditorScreen implements Screen, InputProcessor {
 
 	@Override
 	public boolean keyUp(int keycode) {
-		// keyboard key released
-		if (keycode == Keys.A)
-			controller.leftReleased();
-		if (keycode == Keys.D)
-			controller.rightReleased();
-		if (keycode == Keys.W)
-			controller.upReleased();
+		// TODO Auto-generated method stub
 		return true;
 	}
 

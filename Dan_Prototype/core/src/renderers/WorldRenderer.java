@@ -2,6 +2,7 @@ package renderers;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
@@ -25,6 +26,8 @@ public class WorldRenderer {
 
 	// number of units to fit on the screen vertically
 	public static final float CAMERA_HEIGHT = 10f;
+	public static final Color OVERLAY_COLOR = new Color(0.5f, 0.5f, 0.7f, 0.4f);
+	public static final Color GRID_COLOR = new Color(0.35f, 0.35f, 0.5f, 0);
 
 	private World world;
 	private Editor editor;
@@ -40,22 +43,15 @@ public class WorldRenderer {
 	private SpriteBatch spriteBatch;
 
 	private float ppu; // pixels per unit
-	private float cameraHeight;
-	private float cameraWidth;
-	private int screenHeight;
+	private float cameraWidth; // units
+	private float cameraHeight; // units
 
 	public WorldRenderer(World world, Editor editor) {
 		this.world = world;
 		this.editor = editor;
-		// set view port size
-		this.cam = new OrthographicCamera(cameraWidth, CAMERA_HEIGHT);
-		// set view port to middle of the world
-		this.cam.position.set(0, 0, 0);
-		this.cam.update();
-		
-		shapeRenderer = new ShapeRenderer();
-		
-		spriteBatch = new SpriteBatch();
+		this.cam = new OrthographicCamera();
+		this.shapeRenderer = new ShapeRenderer();
+		this.spriteBatch = new SpriteBatch();
 		this.cameraHeight = CAMERA_HEIGHT;
 		
 		blockTextures = new TextureRegion[2];
@@ -63,16 +59,19 @@ public class WorldRenderer {
 	}
 	
 	/** Scales the size of the camera to the size of the screen */
-	public void setSize(int screenWidth, int screenHeight) {
-		this.screenHeight = screenHeight;
+	public void setSize(int screenWidth, int screenHeight) {		
 		// calculate number of pixels per unit
 		ppu = screenHeight / cameraHeight;
 		this.cameraWidth = screenWidth / ppu;
+		
 		// update camera viewport
-		cam.viewportHeight = cameraHeight;
-		cam.viewportWidth = cameraWidth;
-		this.cam.position.set(cameraWidth / 2f, cameraHeight / 2f, 0);
+		cam.viewportHeight = screenHeight;
+		cam.viewportWidth = screenWidth;
+		cam.position.set(screenWidth / 2f, screenHeight / 2f, 0);
 		cam.update();
+		
+		spriteBatch.setProjectionMatrix(cam.combined);
+		shapeRenderer.setProjectionMatrix(cam.combined);
 	}
 
 	/** Loads textures from texture atlas */
@@ -88,9 +87,13 @@ public class WorldRenderer {
 		spriteBatch.begin();
 		drawBlocks();
 		drawPuffle();
-		if (editor.isEnabled()) drawPlacedBlocks();
 		spriteBatch.end();
-		if (editor.isEnabled()) drawEditor();
+		if (editor != null) drawEditor();
+		if (editor != null) {
+			spriteBatch.begin();
+			drawPlacedBlocks();
+			spriteBatch.end();
+		}
 	}
 
 	private void drawBlocks() {
@@ -112,34 +115,31 @@ public class WorldRenderer {
 	}
 	
 	private void drawPlacedBlocks() {
-		// make sprite batch transparent
-		Color color = spriteBatch.getColor();
-		color.a = 0.5f;
-		spriteBatch.setColor(color);
-		
 		// draw placeable blocks to screen
 		for (Block block : editor.getPlacedBlocks()) {
 			float blockSize = Block.SIZE * ppu;
 			spriteBatch.draw(blockTextures[block.getBlockID()], block.getPosition().x * ppu,
 					block.getPosition().y * ppu, blockSize, blockSize);
 		}
-		
-		// reset transparency
-		color.a = 1f;
-		spriteBatch.setColor(color);
 	}
 	
 	private void drawEditor() {
-		shapeRenderer.setColor(0.50f, 0.50f, 0.60f, 0f);
-		shapeRenderer.setProjectionMatrix(cam.combined);
+		// draw overlay
+		Gdx.gl.glEnable(GL20.GL_BLEND);
+		shapeRenderer.setColor(OVERLAY_COLOR);
+		shapeRenderer.begin(ShapeType.Filled);
+		shapeRenderer.rect(0, 0, cameraWidth * ppu, cameraHeight * ppu);
+		shapeRenderer.end();
+		Gdx.gl.glDisable(GL20.GL_BLEND);
+		
+		// draw grid
+		shapeRenderer.setColor(GRID_COLOR);
 		shapeRenderer.begin(ShapeType.Line);
-		
-		for (int row = 0; row < cam.viewportWidth; row++) {
-			shapeRenderer.line(row , 0, row, cam.viewportHeight);
+		for (int row = 0; row < cameraWidth; row++) {
+			shapeRenderer.line(row * ppu , 0, row * ppu, cameraHeight * ppu);
 		}
-		
-		for (int col = 0; col < cam.viewportHeight; col++) {
-			shapeRenderer.line(0, col, cam.viewportWidth, col);
+		for (int col = 0; col < cameraHeight; col++) {
+			shapeRenderer.line(0, col * ppu, cameraWidth * ppu, col * ppu);
 		}
 		shapeRenderer.end();
 	}
@@ -148,7 +148,7 @@ public class WorldRenderer {
 		return ppu;
 	}
 	
-	public int getScreenHeight() {
-		return screenHeight;
+	public float getScreenHeight() {
+		return cameraHeight * ppu;
 	}
 }

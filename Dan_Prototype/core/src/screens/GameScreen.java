@@ -11,6 +11,7 @@ import com.mygdx.puffles.Puffles;
 
 import controllers.PuffleController;
 import entities.Editor;
+import entities.Level;
 import entities.World;
 
 public class GameScreen implements Screen, InputProcessor {
@@ -22,7 +23,6 @@ public class GameScreen implements Screen, InputProcessor {
 	
 	Puffles game;
 	private World world;
-	private Editor editor;
 	
 	// draws world to the screen
 	private WorldRenderer renderer;
@@ -33,7 +33,6 @@ public class GameScreen implements Screen, InputProcessor {
 	public GameScreen(Puffles puffles) {
 		this.game = puffles;
 		this.world = new World();
-		this.editor = new Editor(false);
 	}
 	
 	public void updateWorld(World world) {
@@ -43,7 +42,7 @@ public class GameScreen implements Screen, InputProcessor {
 	@Override
 	/** Called when this screen becomes the current screen for the game **/
 	public void show() {
-		renderer = new WorldRenderer(world, editor);
+		renderer = new WorldRenderer(world, null);
 		controller = new PuffleController(game, world);
 		// set this screen as current input processor
 		Gdx.input.setInputProcessor(this);

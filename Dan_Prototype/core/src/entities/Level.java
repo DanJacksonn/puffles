@@ -1,6 +1,7 @@
 package entities;
 
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.utils.Array;
 
 public class Level {
 
@@ -44,8 +45,10 @@ public class Level {
 		}
 	}
 	
-	public void addBlock(Block block) {
-		blocks[(int) block.getPosition().x][(int) block.getPosition().y] = block;
+	public void addBlocks(Array<Block> newBlocks) {
+		for (Block block : newBlocks) {
+			blocks[(int) block.getPosition().x][(int) block.getPosition().y] = block;
+		}
 	}
 	
 	// Getters -----------

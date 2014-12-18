@@ -10,11 +10,9 @@ public class Editor {
 	 * -Keeps track of the blocks that have been placed.
 	 */
 	
-	boolean enabled;
 	Array<Block> placedBlocks;
 	
 	public Editor(boolean enabled) {
-		this.enabled = enabled;
 		this.placedBlocks = new Array<Block>();
 	}
 	
@@ -29,11 +27,11 @@ public class Editor {
 		return false;
 	}
 	
-	// Getters ------------
-	public boolean isEnabled() {
-		return enabled;
+	public void clearPlacedBlocks() {
+		placedBlocks.clear();
 	}
 	
+	// Getters ------------
 	public Array<Block> getPlacedBlocks() {
 		return placedBlocks;
 	}

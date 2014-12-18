@@ -22,8 +22,8 @@ public class World {
 	}
 
 	public void createDemoWorld() {
-		puffle = new Puffle(new Vector2(1, 2));
 		level = new Level();
+		puffle = new Puffle(new Vector2(1, 2));
 		inventory = new Inventory();
 	}
 
@@ -63,10 +63,8 @@ public class World {
 		return blocks;
 	}
 	
-	public void addBlocks(Array<Block> blocks) {
-		for (Block block : blocks) {
-			level.addBlock(block);
-		}
+	public void updateLevel(Level level) {
+		this.level = level;
 	}
 	
 	// Getters --------------------
