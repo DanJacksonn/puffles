@@ -10,7 +10,7 @@ public class Inventory {
 	int noOfBlocks;
 	
 	public Inventory() {
-		this.noOfBlocks = 100;
+		this.noOfBlocks = 0;
 	}
 	
 	public void addBlock() {

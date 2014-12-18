@@ -9,6 +9,7 @@ import com.badlogic.gdx.utils.Pool;
 import com.mygdx.puffles.Puffles;
 
 import entities.Block;
+import entities.Inventory;
 import entities.Level;
 import entities.Puffle;
 import entities.World;
@@ -38,6 +39,7 @@ public class PuffleController {
 	
 	// world entities
 	private Level level;
+	private Inventory inventory;
 	private Puffle puffle;
 	
 	private boolean grounded;
@@ -58,6 +60,7 @@ public class PuffleController {
 		this.game = game;
 		this.world = world;
 		this.level = world.getLevel();
+		this.inventory = world.getInventory();
 		this.puffle = world.getPuffle();
 		this.grounded = true;
 		collidableBlocks = new Array<Block>();
@@ -144,7 +147,11 @@ public class PuffleController {
 		// if puffle collides then change direction
 		for (Block block : collidableBlocks) {
 			if (block != null && puffleRect.overlaps(block.getBounds())) {
-				
+				if (block.isBreakable()) {
+					if (level.breakBlock(block.getPosition())) {
+						inventory.addBlock();
+					}
+				}
 				puffle.getVelocity().x *= -1;
 				break;
 			}

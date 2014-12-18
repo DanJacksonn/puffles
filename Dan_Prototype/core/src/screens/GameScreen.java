@@ -10,8 +10,6 @@ import com.badlogic.gdx.graphics.GL20;
 import com.mygdx.puffles.Puffles;
 
 import controllers.PuffleController;
-import entities.Editor;
-import entities.Level;
 import entities.World;
 
 public class GameScreen implements Screen, InputProcessor {

@@ -11,7 +11,6 @@ import com.mygdx.puffles.Puffles;
 
 import controllers.EditorController;
 import entities.Editor;
-import entities.Level;
 import entities.World;
 
 public class EditorScreen implements Screen, InputProcessor {

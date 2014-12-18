@@ -32,14 +32,14 @@ public class Level {
 
 		// add blocks
 		for (int row = 0; row < width; row++) {
-			if (row != 5 && row != 6) {
+			if (row != 5 && row != 6 && row !=7) {
 				blocks[row][0] = new Block(new Vector2(row, 0), 0, false);
 				blocks[row][1] = new Block(new Vector2(row, 1), 0, false);
-				if (row > 2 && row != 9) {
-					blocks[row][2] = new Block(new Vector2(row, 2), 0, false);
+				if (row > 2) {
+					blocks[row][2] = new Block(new Vector2(row, 2), 1, true);
 				}
 				if (row > 9) {
-				blocks[row][3] = new Block(new Vector2(row, 3), 0, false);
+				blocks[row][3] = new Block(new Vector2(row, 3), 1, true);
 				}
 			}
 		}
@@ -48,6 +48,18 @@ public class Level {
 	public void addBlocks(Array<Block> newBlocks) {
 		for (Block block : newBlocks) {
 			blocks[(int) block.getPosition().x][(int) block.getPosition().y] = block;
+		}
+	}
+	
+	public boolean breakBlock(Vector2 position) {
+		Block block = blocks[(int) position.x][(int) position.y];
+		
+		if (block.getDamageValue() == 0) {
+			blocks[(int) position.x][(int) position.y] = null;
+			return true;
+		} else {
+			block.damage();
+			return false;
 		}
 	}
 	
