@@ -16,6 +16,7 @@ public class Block {
 	Vector2 position = new Vector2();
 	Rectangle bounds = new Rectangle();
 	int blockID;
+	int damageValue;
 	boolean breakable;
 	
 	public Block(Vector2 position, int blockID, boolean breakable) {
@@ -25,7 +26,12 @@ public class Block {
 		this.bounds.width = SIZE;
 		this.bounds.height = SIZE;
 		this.blockID = blockID;
+		this.damageValue = 2;
 		this.breakable = breakable;
+	}
+	
+	public void damage() {
+		damageValue--;
 	}
 	
 	// Getters ---------------
@@ -39,6 +45,10 @@ public class Block {
 	
 	public int getBlockID() {
 		return blockID;
+	}
+	
+	public int getDamageValue() {
+		return damageValue;
 	}
 	
 	public boolean isBreakable() {

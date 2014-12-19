@@ -1,5 +1,6 @@
 package entities;
 
+import com.badlogic.gdx.math.Circle;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 
@@ -19,7 +20,7 @@ public class Puffle {
 	public static final float SIZE = 0.7f;
 	
 	Vector2 position = new Vector2();
-	Rectangle bounds = new Rectangle();
+	Circle bounds = new Circle();
 	
 	// movement vectors
 	Vector2 acceleration = new Vector2();
@@ -35,8 +36,7 @@ public class Puffle {
 		this.position = position;
 		this.bounds.x = position.x;
 		this.bounds.y = position.y;
-		this.bounds.height = SIZE;
-		this.bounds.width = SIZE;
+		this.bounds.radius = 0.35f;
 		this.rotation = 90;
 		this.state = State.STOPPED;
 		this.jumping = false;
@@ -85,7 +85,7 @@ public class Puffle {
 		return position;
 	}
 	
-	public Rectangle getBounds() {
+	public Circle getBounds() {
 		return bounds;
 	}
 	
@@ -107,6 +107,10 @@ public class Puffle {
 	
 	public State getState() {
 		return state;
+	}
+	
+	public float getRadius() {
+		return bounds.radius;
 	}
 	// -------------------------
 	

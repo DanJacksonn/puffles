@@ -3,7 +3,8 @@ package controllers;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.math.Circle;
+import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import com.mygdx.puffles.Puffles;
@@ -45,10 +46,10 @@ public class PuffleController {
 	private boolean grounded;
 
 	// pool of rectangles can be reused to avoid allocation
-	private Pool<Rectangle> rectPool = new Pool<Rectangle>() {
+	private Pool<Circle> circlePool = new Pool<Circle>() {
 		@Override
-		protected Rectangle newObject() {
-			return new Rectangle();
+		protected Circle newObject() {
+			return new Circle();
 		}
 	};
 
@@ -111,30 +112,29 @@ public class PuffleController {
 	}
 
 	private void checkCollisionWithBlocks(float delta) {
-		Rectangle puffleRect;
+		Circle puffleCircle;
 		int x1, x2, y1, y2;
 
 		// scale velocity to time frame units
 		puffle.scaleVelocity(delta);
 
 		// set rectangle to puffle's bounding box
-		puffleRect = rectPool.obtain();
-		puffleRect.set(puffle.getBounds().x, puffle.getBounds().y,
-				puffle.getBounds().width, puffle.getBounds().height);
-
-		// store current y position
-		y1 = (int) puffle.getBounds().y;
-		y2 = (int) (puffle.getBounds().y + puffle.getBounds().height);
+		puffleCircle = circlePool.obtain();
+		puffleCircle.set(puffle.getBounds().x, puffle.getBounds().y ,puffle.getBounds().radius);
+		
+		// store y area inhabited by puffle
+		y1 = (int) (puffle.getBounds().y - puffle.getBounds().radius);
+		y2 = (int) (puffle.getBounds().y + puffle.getBounds().radius);
 
 		if (puffle.getVelocity().x < 0) {
 			// store position after moving left
-			x1 = x2 = (int) Math.floor(puffle.getBounds().x
+			x1 = x2 = (int) Math.floor(puffle.getBounds().x - puffle.getBounds().radius
 					+ puffle.getVelocity().x);
 
 		} else {
 			// store position after moving right
 			x1 = x2 = (int) Math.floor(puffle.getBounds().x
-					+ puffle.getBounds().width + puffle.getVelocity().x);
+					+ puffle.getBounds().radius + puffle.getVelocity().x);
 
 		}
 
@@ -142,11 +142,11 @@ public class PuffleController {
 		findCollidableBlocks(x1, y1, x2, y2);
 
 		// simulate horizontal movement
-		puffleRect.x += puffle.getVelocity().x;
-
+		puffleCircle.x += puffle.getVelocity().x;
+		
 		// if puffle collides then change direction
 		for (Block block : collidableBlocks) {
-			if (block != null && puffleRect.overlaps(block.getBounds())) {
+			if (block != null && Intersector.overlaps(puffleCircle, block.getBounds())) {
 				if (block.isBreakable()) {
 					if (level.breakBlock(block.getPosition())) {
 						inventory.addBlock();
@@ -158,32 +158,32 @@ public class PuffleController {
 		}
 
 		// reset x position of puffle's bounding box
-		puffleRect.x = puffle.getPosition().x;
+		puffleCircle.x = puffle.getPosition().x;
 
 		// store x position
-		x1 = (int) puffle.getBounds().x;
-		x2 = (int) (puffle.getBounds().x + puffle.getBounds().width);
+		x1 = (int) (puffle.getBounds().x - puffle.getBounds().radius);
+		x2 = (int) (puffle.getBounds().x + puffle.getBounds().radius);
 
 		if (puffle.getVelocity().y < 0) {
 			// store position after moving down
 			y1 = y2 = (int) Math.floor(puffle.getBounds().y
-					+ puffle.getVelocity().y);
+					- puffle.getBounds().radius + puffle.getVelocity().y);
 
 		} else {
 			// store position after moving up
 			y1 = y2 = (int) Math.floor(puffle.getBounds().y
-					+ puffle.getBounds().height + puffle.getVelocity().y);
+					+ puffle.getBounds().radius + puffle.getVelocity().y);
 		}
 
 		// store all blocks the puffle can collide with
 		findCollidableBlocks(x1, y1, x2, y2);
 
 		// simulate vertical movement
-		puffleRect.y += puffle.getVelocity().y;
+		puffleCircle.y += puffle.getVelocity().y;
 
 		// if puffle collides stop vertical movement
 		for (Block block : collidableBlocks) {
-			if (block != null && puffleRect.overlaps(block.getBounds())) {
+			if (block != null && Intersector.overlaps(puffleCircle, block.getBounds())) {
 				if (puffle.getVelocity().y < 0)
 					grounded = true;
 				puffle.setYVelocity(0);
@@ -192,7 +192,7 @@ public class PuffleController {
 		}
 
 		// reset y position of puffle
-		puffleRect.y = puffle.getPosition().y;
+		puffleCircle.y = puffle.getPosition().y;
 
 		// un-scale velocity from time frame units
 		puffle.scaleVelocity(1 / delta);

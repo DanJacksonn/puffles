@@ -8,8 +8,8 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
-import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType; 
+import com.badlogic.gdx.math.Circle;
 
 import entities.Block;
 import entities.Editor;
@@ -88,12 +88,21 @@ public class WorldRenderer {
 		drawBlocks();
 		drawPuffle();
 		spriteBatch.end();
+		//debug();
 		if (editor != null) drawEditor();
 		if (editor != null) {
 			spriteBatch.begin();
 			drawPlacedBlocks();
 			spriteBatch.end();
 		}
+	}
+	
+	private void debug() {
+		shapeRenderer.setColor(Color.RED);
+		shapeRenderer.begin(ShapeType.Filled);
+		Circle bounds = world.getPuffle().getBounds();
+		shapeRenderer.circle(bounds.x * ppu, bounds.y * ppu, bounds.radius * ppu);
+		shapeRenderer.end();
 	}
 
 	private void drawBlocks() {
@@ -109,8 +118,8 @@ public class WorldRenderer {
 		Puffle puffle = world.getPuffle();
 		float puffleSize = Puffle.SIZE * ppu;
 		// draw puffle to screen with rotation
-		spriteBatch.draw(puffleTexture, puffle.getPosition().x * ppu,
-				puffle.getPosition().y * ppu, puffleSize / 2, puffleSize / 2,
+		spriteBatch.draw(puffleTexture, (puffle.getPosition().x - puffle.getRadius()) * ppu,
+				(puffle.getPosition().y - puffle.getRadius()) * ppu, puffleSize / 2, puffleSize / 2,
 				puffleSize, puffleSize, 1f, 1f, puffle.getRotation(), true);
 	}
 	
