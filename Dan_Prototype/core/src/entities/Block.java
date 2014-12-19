@@ -20,7 +20,7 @@ public class Block {
 	int damageValue;
 	boolean breakable;
 	
-	public Block(Vector2 position, int blockID, boolean breakable) {
+	public Block(Vector2 position, int blockID) {
 		this.position = position;
 		this.bounds.setX(position.x);
 		this.bounds.setY(position.y);
@@ -28,7 +28,11 @@ public class Block {
 		this.bounds.height = SIZE;
 		this.blockID = blockID;
 		this.damageValue = 0;
-		this.breakable = breakable;
+		if (blockID == 0) {
+			this.breakable = false;
+		} else {
+			this.breakable = true;
+		}
 	}
 	
 	public void damage() {

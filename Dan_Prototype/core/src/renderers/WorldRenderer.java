@@ -11,6 +11,7 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType; 
 import com.badlogic.gdx.math.Circle;
+import com.badlogic.gdx.math.Vector2;
 
 import entities.Block;
 import entities.Editor;
@@ -36,7 +37,7 @@ public class WorldRenderer {
 	private Editor editor;
 
 	// allows the camera to only render part of the world
-	private OrthographicCamera cam;
+	private OrthographicCamera camera;
 	
 	private ShapeRenderer shapeRenderer;
 
@@ -53,7 +54,7 @@ public class WorldRenderer {
 	public WorldRenderer(World world, Editor editor) {
 		this.world = world;
 		this.editor = editor;
-		this.cam = new OrthographicCamera();
+		this.camera = new OrthographicCamera();
 		this.shapeRenderer = new ShapeRenderer();
 		this.spriteBatch = new SpriteBatch();
 		this.cameraHeight = CAMERA_HEIGHT;
@@ -84,15 +85,15 @@ public class WorldRenderer {
 		this.cameraWidth = screenWidth / ppu;
 		
 		// update camera viewport
-		cam.viewportHeight = screenHeight;
-		cam.viewportWidth = screenWidth;
-		cam.position.set(screenWidth / 2f, screenHeight / 2f, 0);
-		cam.update();
+		camera.viewportHeight = screenHeight;
+		camera.viewportWidth = screenWidth;
+		camera.position.set(screenWidth / 2f, screenHeight / 2f, 0);
+		camera.update();
 		
-		spriteBatch.setProjectionMatrix(cam.combined);
-		shapeRenderer.setProjectionMatrix(cam.combined);
+		spriteBatch.setProjectionMatrix(camera.combined);
+		shapeRenderer.setProjectionMatrix(camera.combined);
 	}
-
+	
 	public void render() {
 		spriteBatch.begin();
 		drawBlocks();

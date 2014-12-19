@@ -1,60 +1,94 @@
 package entities;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 
 public class Level {
 
 	/**
-	 * This class represents a level.
-	 * A level is an array of blocks.
+	 * This class represents a level. A level is an array of blocks.
 	 */
-	
+
+	private int levelID;
 	private int width;
 	private int height;
 	private Block[][] blocks;
 
 	public Level() {
-		loadDemoLevel();
+		this.levelID = 1;
+		loadLevelText();
 	}
 
-	public void loadDemoLevel() {
-		width = 15;
-		height = 10;
-		blocks = new Block[width][height];
+	/** Loads a level from a file */
+	private void loadLevelText() {
+		char tileType;
 
-		// fill level with empty blocks
-		for (int row = 0; row < width; row++) {
-			for (int col = 0; col < height; col++) {
-				blocks[row][col] = null;
-			}
-		}
+		// read map from file
+		FileHandle file = Gdx.files.internal(
+				"levels/lvl" + levelID+ ".map");
+		String map = file.readString();
 
-		// add blocks
-		for (int row = 0; row < width; row++) {
-			if (row != 5 && row != 6 && row !=7) {
-				blocks[row][0] = new Block(new Vector2(row, 0), 0, false);
-				blocks[row][1] = new Block(new Vector2(row, 1), 0, false);
-				if (row > 2) {
-					blocks[row][2] = new Block(new Vector2(row, 2), 1, true);
-				}
-				if (row > 9) {
-				blocks[row][3] = new Block(new Vector2(row, 3), 1, true);
-				}
+		// store width of level
+		this.width = getLevelWidth(map);
+		// store width of map (accounts for \r\n on map)
+		int mapWidth = width + 2;
+
+		// store height of level (same as map)
+		this.height = (map.length() + 2) / mapWidth;
+
+		// store level blocks
+		this.blocks = new Block[width + 1][height + 1];
+
+		// for every tile in level
+		for (int y = 0; y < height; y++) {
+			for (int x = 0; x < width; x++) {
+				// get tile type from map
+				tileType = map.charAt((y * mapWidth) + x);
+				// add new block of type tileType
+				blocks[x][(height - y) - 1] = 
+						toBlock(tileType, x, (height - y) - 1);
 			}
 		}
 	}
-	
+
+	/** Calculates width of the level */
+	private int getLevelWidth(String gmap) {
+		char[] map = gmap.toCharArray();
+		int count = 0;
+		for (char character : map) {
+			if (character == '\r') {
+				return count;
+			}
+			count++;
+		}
+		return count;
+	}
+
+	/** Converts map character to block */
+	private Block toBlock(char c, int row, int col) {
+		Vector2 position = new Vector2(row, col);
+		switch (c) {
+		case '#':
+			return new Block(position, 0);
+		case '%':
+			return new Block(position, 1);
+		default:
+			return null;
+		}
+	}
+
 	public void addBlocks(Array<Block> newBlocks) {
 		for (Block block : newBlocks) {
 			blocks[(int) block.getPosition().x][(int) block.getPosition().y] = block;
 		}
 	}
-	
+
 	public boolean breakBlock(Vector2 position) {
 		Block block = blocks[(int) position.x][(int) position.y];
 		block.damage();
-		
+
 		if (block.isBroken()) {
 			blocks[(int) position.x][(int) position.y] = null;
 			return true;
@@ -62,7 +96,7 @@ public class Level {
 			return false;
 		}
 	}
-	
+
 	// Getters -----------
 	public int getWidth() {
 		return width;
@@ -79,7 +113,7 @@ public class Level {
 	public Block getBlock(int row, int col) {
 		return blocks[row][col];
 	}
-	
+
 	public boolean isEmpty(Vector2 position) {
 		return blocks[(int) position.x][(int) position.y] == null;
 	}

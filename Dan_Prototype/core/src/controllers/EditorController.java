@@ -78,7 +78,7 @@ public class EditorController {
 			if (placeable()) {
 				// place block
 				editor.placeBlock(new Block(new Vector2(selectedBlock.x,
-						selectedBlock.y), 1, true));
+						selectedBlock.y), 1));
 				inventory.removeBlock();
 			}
 			keys.get(keys.put(Keys.PLACE, false));

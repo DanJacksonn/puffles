@@ -32,7 +32,6 @@ public class EditorScreen implements Screen, InputProcessor {
 
 	public EditorScreen(Puffles game) {
 		this.game = game;
-		this.world = new World();
 		this.editor = new Editor(true);
 	}
 	
