@@ -53,12 +53,12 @@ public class Level {
 	
 	public boolean breakBlock(Vector2 position) {
 		Block block = blocks[(int) position.x][(int) position.y];
+		block.damage();
 		
-		if (block.getDamageValue() == 0) {
+		if (block.isBroken()) {
 			blocks[(int) position.x][(int) position.y] = null;
 			return true;
 		} else {
-			block.damage();
 			return false;
 		}
 	}

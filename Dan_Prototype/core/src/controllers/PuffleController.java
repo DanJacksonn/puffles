@@ -26,10 +26,12 @@ public class PuffleController {
 	enum Keys {
 		LEFT, RIGHT, JUMP, EDIT
 	}
+	
+	static Map<Keys, Boolean> keys = new HashMap<PuffleController.Keys, Boolean>();
 
 	// horizontal vectors
 	private static final float ROLL_ACCELERATION = 11f;
-	private static final float ROLL_SPEED = 2.5f;
+	private static final float ROLL_SPEED = 2.6f;
 	private static final float FRICTION = 0.9f;
 	// vertical vectors
 	private static final float GRAVITY = -29f;
@@ -54,8 +56,6 @@ public class PuffleController {
 	};
 
 	private Array<Block> collidableBlocks;
-
-	static Map<Keys, Boolean> keys = new HashMap<PuffleController.Keys, Boolean>();
 
 	public PuffleController(Puffles game, World world) {
 		this.game = game;

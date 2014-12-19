@@ -43,8 +43,10 @@ public class EditorScreen implements Screen, InputProcessor {
 	@Override
 	/** Called when this screen becomes the current screen for the game **/
 	public void show() {
-		renderer = new WorldRenderer(world, editor);
 		controller = new EditorController(game, world, editor);
+		
+		// render world with editing enabled
+		renderer = new WorldRenderer(world, editor);
 		
 		// set this screen as current input processor
 		Gdx.input.setInputProcessor(this);

@@ -1,7 +1,6 @@
 package entities;
 
 import com.badlogic.gdx.math.Circle;
-import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 
 public class Puffle {
@@ -17,26 +16,26 @@ public class Puffle {
 		STOPPED, ROLLING, DYING
 	}
 	
-	public static final float SIZE = 0.7f;
+	public static final float RADIUS = 0.35f;
 	
-	Vector2 position = new Vector2();
-	Circle bounds = new Circle();
+	// position
+	private Vector2 position;
+	private Circle bounds;
 	
-	// movement vectors
-	Vector2 acceleration = new Vector2();
-	Vector2 velocity = new Vector2();
-	
-	float rotation;
+	// movement
+	private Vector2 acceleration;
+	private Vector2 velocity;
+	private float rotation;
 	
 	// states
-	State state;
-	boolean jumping;
+	private State state;
+	private boolean jumping;
 	
-	public Puffle(Vector2 position) {
-		this.position = position;
-		this.bounds.x = position.x;
-		this.bounds.y = position.y;
-		this.bounds.radius = 0.35f;
+	public Puffle(Vector2 newPosition) {
+		this.position = new Vector2(newPosition.add(RADIUS, RADIUS + 1));
+		this.bounds = new Circle(position.x, position.y, RADIUS);
+		this.acceleration = new Vector2();
+		this.velocity = new Vector2();
 		this.rotation = 90;
 		this.state = State.STOPPED;
 		this.jumping = false;
@@ -46,8 +45,11 @@ public class Puffle {
 	public void update(float delta) {
 		// add distance travelled in delta seconds to current position
 		position.add(velocity.cpy().scl(delta));
+		
+		//update bounds
 		bounds.x = position.x;
 		bounds.y = position.y;
+		
 		roll();
 	}
 	

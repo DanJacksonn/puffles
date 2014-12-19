@@ -7,6 +7,7 @@ public class Inventory {
 	 */
 	
 	public static final float MAX_BLOCKS = 10;
+	
 	int noOfBlocks;
 	
 	public Inventory() {

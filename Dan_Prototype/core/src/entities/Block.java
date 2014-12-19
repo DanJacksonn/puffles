@@ -12,6 +12,7 @@ public class Block {
 	 */
 
 	public static final float SIZE = 1f; // 1 unit
+	public static final int BREAKING_POINT = 3;
 	
 	Vector2 position = new Vector2();
 	Rectangle bounds = new Rectangle();
@@ -26,12 +27,16 @@ public class Block {
 		this.bounds.width = SIZE;
 		this.bounds.height = SIZE;
 		this.blockID = blockID;
-		this.damageValue = 2;
+		this.damageValue = 0;
 		this.breakable = breakable;
 	}
 	
 	public void damage() {
-		damageValue--;
+		damageValue++;
+	}
+	
+	public boolean isBroken() {
+		return damageValue == BREAKING_POINT;
 	}
 	
 	// Getters ---------------
