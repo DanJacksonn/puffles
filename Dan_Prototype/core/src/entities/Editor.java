@@ -5,11 +5,9 @@ import com.badlogic.gdx.utils.Array;
 
 public class Editor {
 
-	boolean enabled;
 	Array<Block> placedBlocks;
 	
-	public Editor(boolean enabled) {
-		this.enabled = enabled;
+	public Editor() {
 		placedBlocks = new Array<Block>();
 	}
 	
@@ -19,10 +17,6 @@ public class Editor {
 	
 	public Array<Block> getPlacedBlocks() {
 		return placedBlocks;
-	}
-	
-	public boolean isEnabled() {
-		return enabled;
 	}
 	
 	public boolean isBlockPlacedAt(Vector2 pos) {

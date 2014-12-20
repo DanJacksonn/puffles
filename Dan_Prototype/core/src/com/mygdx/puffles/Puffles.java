@@ -1,19 +1,35 @@
 package com.mygdx.puffles;
 
-import screens.EditorScreen;
-import screens.GameScreen;
-
 import com.badlogic.gdx.Game;
 
+import screens.EditorScreen;
+import screens.GameScreen;
+import entities.World;
+
 public class Puffles extends Game {
-	
-	public GameScreen gameScreen;
-	public EditorScreen editorScreen;
+
+	private World world;
+	private GameScreen gameScreen;
+	private EditorScreen editorScreen;
 	
 	@Override
 	public void create () {
-		gameScreen = new GameScreen(this);
-		editorScreen = new EditorScreen(this);
+		this.world = new World();
+		this.gameScreen = new GameScreen(this);
+		this.editorScreen = new EditorScreen(this);
 		setScreen(gameScreen);
 	}
+	
+	public World getWorld() {
+		return world;
+	}
+	
+	public GameScreen getGameScreen() {
+		return gameScreen;
+	}
+	
+	public EditorScreen getEditorScreen() {
+		return editorScreen;
+	}
+
 }

@@ -16,37 +16,29 @@ import entities.World;
 public class GameScreen implements Screen, InputProcessor {
 
 	/**
-	 * This class controls processes whilst the game is running. 
-	 * -Renders the world to the screen and processes inputs.
+	 * This class renders the world to the screen and processes inputs.
 	 */
 	
-	Puffles game;
-	private World world;
-	private Editor editor;
-	
-	// draws world to the screen
-	private WorldRenderer renderer;
+	private Puffles game;
 	
 	// processes inputs and character movement
 	private PuffleController controller;
-
-	public GameScreen(Puffles puffles) {
-		this.game = puffles;
-		this.world = new World();
-		this.editor = new Editor(false);
-	}
 	
-	public void updateWorld(World world) {
-		this.world = world;
+	// draws world to the screen
+	private WorldRenderer renderer;
+
+	public GameScreen(Puffles game) {
+		this.game = game;
 	}
 	
 	@Override
 	/** Called when this screen becomes the current screen for the game **/
 	public void show() {
-		// render world with editing disabled
-		renderer = new WorldRenderer(world, editor);
+		controller = new PuffleController(game.getWorld());
 		
-		controller = new PuffleController(game, world);
+		// render world with editing disabled
+		renderer = new WorldRenderer(game.getWorld(), null);
+		
 		// set this screen as current input processor
 		Gdx.input.setInputProcessor(this);
 	}
@@ -103,7 +95,8 @@ public class GameScreen implements Screen, InputProcessor {
 		if (keycode == Keys.W)
 			controller.jumpPressed();
 		if (keycode == Keys.E) {
-			controller.editPressed(game);
+			controller.resetKeys();
+			game.setScreen(game.getEditorScreen());
 		}
 		return true;
 	}

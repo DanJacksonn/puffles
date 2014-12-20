@@ -6,12 +6,12 @@ import java.util.Map;
 import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
-import com.mygdx.puffles.Puffles;
 
 import entities.Block;
 import entities.Editor;
 import entities.Inventory;
 import entities.Level;
+import entities.Puffle;
 import entities.World;
 
 public class EditorController {
@@ -21,24 +21,22 @@ public class EditorController {
 	 */
 
 	enum Keys {
-		PLACE, BACK
+		PLACE
 	}
 
 	static Map<Keys, Boolean> keys;
 
-	private Puffles game;
-	private World world;
 	private Editor editor;
 
 	// world entities
+	private Puffle puffle;
 	private Level level;
 	private Inventory inventory;
 
 	private Vector2 selectedBlock;
 
-	public EditorController(Puffles game, World world, Editor editor) {
-		this.game = game;
-		this.world = world;
+	public EditorController(World world, Editor editor) {
+		this.puffle = world.getPuffle();
 		this.level = world.getLevel();
 		this.inventory = world.getInventory();
 
@@ -49,16 +47,12 @@ public class EditorController {
 		resetKeys();
 	}
 
-	private void resetKeys() {
+	public void resetKeys() {
 		keys.put(Keys.PLACE, false);
-		keys.put(Keys.BACK, false);
 	}
 
 	public void update(float delta) {
 		processInput();
-
-		// do things depending on input
-
 	}
 
 	// Events ----------------
@@ -66,11 +60,7 @@ public class EditorController {
 		keys.get(keys.put(Keys.PLACE, true));
 		selectedBlock.set(selectedX, selectedY);
 	}
-
-	public void backPressed() {
-		keys.get(keys.put(Keys.BACK, true));
-	}
-
+	
 	// -------------------------
 
 	private boolean processInput() {
@@ -82,18 +72,16 @@ public class EditorController {
 				inventory.removeBlock();
 			}
 			keys.get(keys.put(Keys.PLACE, false));
-		} else if (keys.get(Keys.BACK)) {
-			// switch back to game screen
-			resetKeys();
-			// add placed blocks to the world
-			level.addBlocks(editor.getPlacedBlocks());
-			editor.clearPlacedBlocks();
-			// update the game world
-			game.gameScreen.updateWorld(world);
-			// resume game
-			game.setScreen(game.gameScreen);
 		}
 		return false;
+	}
+	
+	public void applyEdits() {
+		// switch back to game screen
+		resetKeys();
+		// add placed blocks to the world
+		level.addBlocks(editor.getPlacedBlocks());
+		editor.clearPlacedBlocks();
 	}
 
 	/** True if block can be placed in the currently selected block */
@@ -101,7 +89,7 @@ public class EditorController {
 		// puffle in the way
 		Rectangle selectedBounds = new Rectangle(selectedBlock.x, selectedBlock.y,
 				Block.SIZE, Block.SIZE);
-		if (Intersector.overlaps(world.getPuffle().getBounds(), selectedBounds)) {
+		if (Intersector.overlaps(puffle.getBounds(), selectedBounds)) {
 			return false;
 		}
 		// already placed a block here

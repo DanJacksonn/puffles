@@ -20,32 +20,27 @@ public class EditorScreen implements Screen, InputProcessor {
 	 * -Renders the world to the screen and processes inputs.
 	 */
 
-	Puffles game;
-	private World world;
+	private Puffles game;
 	private Editor editor;
 	
 	// draws world to the screen
 	private WorldRenderer renderer;
-	
+
 	// processes inputs and character movement
 	private EditorController controller;
 
 	public EditorScreen(Puffles game) {
 		this.game = game;
-		this.editor = new Editor(true);
-	}
-	
-	public void updateWorld(World world) {
-		this.world = world;
+		this.editor = new Editor();
 	}
 	
 	@Override
 	/** Called when this screen becomes the current screen for the game **/
 	public void show() {
-		controller = new EditorController(game, world, editor);
+		controller = new EditorController(game.getWorld(), editor);
 		
-		// render world with editing enabled
-		renderer = new WorldRenderer(world, editor);
+		// renmakes the controllersder world with editing enabled
+		renderer = new WorldRenderer(game.getWorld(), editor);
 		
 		// set this screen as current input processor
 		Gdx.input.setInputProcessor(this);
@@ -97,7 +92,9 @@ public class EditorScreen implements Screen, InputProcessor {
 	public boolean keyDown(int keycode) {
 		// keyboard key pressed
 		if (keycode == Keys.E)
-			controller.backPressed();
+			controller.applyEdits();
+			// resume game
+			game.setScreen(game.getGameScreen());
 		return true;
 	}
 

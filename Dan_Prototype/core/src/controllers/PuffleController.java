@@ -7,7 +7,6 @@ import com.badlogic.gdx.math.Circle;
 import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
-import com.mygdx.puffles.Puffles;
 
 import entities.Block;
 import entities.Inventory;
@@ -19,14 +18,14 @@ import entities.Puffle.State;
 public class PuffleController {
 
 	/**
-	 * This class controls the puffle's movement. 
-	 * -Reacts to particular keys being pressed.
+	 * This class controls the puffle's movement. -Reacts to particular keys
+	 * being pressed.
 	 */
 
 	enum Keys {
-		LEFT, RIGHT, JUMP, EDIT
+		LEFT, RIGHT, JUMP
 	}
-	
+
 	static Map<Keys, Boolean> keys = new HashMap<PuffleController.Keys, Boolean>();
 
 	// horizontal vectors
@@ -37,14 +36,11 @@ public class PuffleController {
 	private static final float GRAVITY = -29f;
 	private static final float JUMP_SPEED = 9f;
 
-	private Puffles game;
-	private World world;
-	
 	// world entities
+	private Puffle puffle;
 	private Level level;
 	private Inventory inventory;
-	private Puffle puffle;
-	
+
 	private boolean grounded;
 
 	// pool of rectangles can be reused to avoid allocation
@@ -57,9 +53,7 @@ public class PuffleController {
 
 	private Array<Block> collidableBlocks;
 
-	public PuffleController(Puffles game, World world) {
-		this.game = game;
-		this.world = world;
+	public PuffleController(World world) {
 		this.level = world.getLevel();
 		this.inventory = world.getInventory();
 		this.puffle = world.getPuffle();
@@ -67,12 +61,11 @@ public class PuffleController {
 		collidableBlocks = new Array<Block>();
 		resetKeys();
 	}
-	
-	private void resetKeys() {
+
+	public void resetKeys() {
 		keys.put(Keys.LEFT, false);
 		keys.put(Keys.RIGHT, false);
 		keys.put(Keys.JUMP, false);
-		keys.put(Keys.EDIT, false);
 	}
 
 	public void update(float delta) {
@@ -97,7 +90,11 @@ public class PuffleController {
 
 		// apply friction when not accelerating
 		if (puffle.getAcceleration().x == 0) {
-			puffle.scaleVelocity(FRICTION, 1);
+			if (puffle.getVelocity().x == 0) {
+				puffle.setState(State.STOPPED);
+			} else {
+				puffle.scaleVelocity(FRICTION, 1);
+			}
 		}
 
 		// make sure max speed is not exceeded
@@ -120,16 +117,17 @@ public class PuffleController {
 
 		// set rectangle to puffle's bounding box
 		puffleCircle = circlePool.obtain();
-		puffleCircle.set(puffle.getBounds().x, puffle.getBounds().y ,puffle.getBounds().radius);
-		
+		puffleCircle.set(puffle.getBounds().x, puffle.getBounds().y,
+				puffle.getBounds().radius);
+
 		// store y area inhabited by puffle
 		y1 = (int) (puffle.getBounds().y - puffle.getBounds().radius);
 		y2 = (int) (puffle.getBounds().y + puffle.getBounds().radius);
 
 		if (puffle.getVelocity().x < 0) {
 			// store position after moving left
-			x1 = x2 = (int) Math.floor(puffle.getBounds().x - puffle.getBounds().radius
-					+ puffle.getVelocity().x);
+			x1 = x2 = (int) Math.floor(puffle.getBounds().x
+					- puffle.getBounds().radius + puffle.getVelocity().x);
 
 		} else {
 			// store position after moving right
@@ -143,10 +141,11 @@ public class PuffleController {
 
 		// simulate horizontal movement
 		puffleCircle.x += puffle.getVelocity().x;
-		
+
 		// if puffle collides then change direction
 		for (Block block : collidableBlocks) {
-			if (block != null && Intersector.overlaps(puffleCircle, block.getBounds())) {
+			if (block != null
+					&& Intersector.overlaps(puffleCircle, block.getBounds())) {
 				if (block.isBreakable()) {
 					if (level.breakBlock(block.getPosition())) {
 						inventory.addBlock();
@@ -183,16 +182,14 @@ public class PuffleController {
 
 		// if puffle collides stop vertical movement
 		for (Block block : collidableBlocks) {
-			if (block != null && Intersector.overlaps(puffleCircle, block.getBounds())) {
+			if (block != null
+					&& Intersector.overlaps(puffleCircle, block.getBounds())) {
 				if (puffle.getVelocity().y < 0)
 					grounded = true;
 				puffle.setYVelocity(0);
 				break;
 			}
 		}
-
-		// reset y position of puffle
-		puffleCircle.y = puffle.getPosition().y;
 
 		// un-scale velocity from time frame units
 		puffle.scaleVelocity(1 / delta);
@@ -226,10 +223,6 @@ public class PuffleController {
 		keys.get(keys.put(Keys.JUMP, true));
 	}
 
-	public void editPressed(Puffles game) {
-		keys.get(keys.put(Keys.EDIT, true));
-	}
-
 	public void leftReleased() {
 		keys.get(keys.put(Keys.LEFT, false));
 	}
@@ -245,37 +238,28 @@ public class PuffleController {
 	// -------------------------
 
 	private void processInput() {
-		if (keys.get(Keys.EDIT)) {
-			resetKeys();
-			// update the game world
-			game.editorScreen.updateWorld(world);
-			// switch to edit mode
-			game.setScreen(game.editorScreen);
+		if (keys.get(Keys.JUMP)) {
+			// if not already jumping
+			if (!puffle.isJumping()) {
+				// jump
+				puffle.setJumping(true);
+				puffle.setYVelocity(JUMP_SPEED);
+				grounded = false;
+			}
+		}
+
+		if (keys.get(Keys.LEFT)) {
+			// start moving puffle left
+			puffle.setState(State.ROLLING);
+			puffle.setXAcceleration(-ROLL_ACCELERATION);
+		} else if (keys.get(Keys.RIGHT)) {
+			// start moving puffle right
+			puffle.setState(State.ROLLING);
+			puffle.setXAcceleration(ROLL_ACCELERATION);
 		} else {
-
-			if (keys.get(Keys.JUMP)) {
-				// if not already jumping
-				if (!puffle.isJumping()) {
-					// jump
-					puffle.setJumping(true);
-					puffle.setYVelocity(JUMP_SPEED);
-					grounded = false;
-				}
-			}
-
-			if (keys.get(Keys.LEFT)) {
-				// start moving puffle left
-				puffle.setState(State.ROLLING);
-				puffle.setXAcceleration(-ROLL_ACCELERATION);
-			} else if (keys.get(Keys.RIGHT)) {
-				// start moving puffle right
-				puffle.setState(State.ROLLING);
-				puffle.setXAcceleration(ROLL_ACCELERATION);
-			} else {
-				// stop moving
-				puffle.setState(State.STOPPED);
-				puffle.setXAcceleration(0);
-			}
+			// stop moving
+			puffle.setState(State.STOPPED);
+			puffle.setXAcceleration(0);
 		}
 	}
 

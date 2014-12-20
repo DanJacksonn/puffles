@@ -79,7 +79,7 @@ public class WorldRenderer {
 	}
 	
 	/** Scales the size of the camera to the size of the screen */
-	public void setSize(int screenWidth, int screenHeight) {		
+	public void setSize(int screenWidth, int screenHeight) {
 		// calculate number of pixels per unit
 		ppu = screenHeight / cameraHeight;
 		this.cameraWidth = screenWidth / ppu;
@@ -97,9 +97,9 @@ public class WorldRenderer {
 	public void render() {
 		spriteBatch.begin();
 		drawBlocks();
-		drawPuffle();
+		drawPuffle();                                                                                          
 		spriteBatch.end();
-		if (editor.isEnabled()) {
+		if (editor != null) {
 			drawEditor();
 			spriteBatch.begin();
 			drawPlacedBlocks();
@@ -127,8 +127,8 @@ public class WorldRenderer {
 		Puffle puffle = world.getPuffle();
 		float puffleSize = (Puffle.RADIUS * 2) * ppu;
 		// draw puffle to screen with rotation
-		spriteBatch.draw(puffleTexture, (puffle.getPosition().x - puffle.getRadius()) * ppu,
-				(puffle.getPosition().y - puffle.getRadius()) * ppu, puffleSize / 2, puffleSize / 2,
+		spriteBatch.draw(puffleTexture, (puffle.getPosition().x - Puffle.RADIUS) * ppu,
+				(puffle.getPosition().y - Puffle.RADIUS) * ppu, puffleSize / 2, puffleSize / 2,
 				puffleSize, puffleSize, 1f, 1f, puffle.getRotation(), true);
 	}
 	

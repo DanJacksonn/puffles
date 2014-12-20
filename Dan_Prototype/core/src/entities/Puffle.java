@@ -17,6 +17,7 @@ public class Puffle {
 	}
 	
 	public static final float RADIUS = 0.35f;
+	public static final float PLOP_HEIGHT = 1f;
 	
 	// position
 	private Vector2 position;
@@ -32,7 +33,7 @@ public class Puffle {
 	private boolean jumping;
 	
 	public Puffle(Vector2 newPosition) {
-		this.position = new Vector2(newPosition.add(RADIUS, RADIUS + 1));
+		this.position = new Vector2(newPosition.add(RADIUS, RADIUS + PLOP_HEIGHT));
 		this.bounds = new Circle(position.x, position.y, RADIUS);
 		this.acceleration = new Vector2();
 		this.velocity = new Vector2();
@@ -109,10 +110,6 @@ public class Puffle {
 	
 	public State getState() {
 		return state;
-	}
-	
-	public float getRadius() {
-		return bounds.radius;
 	}
 	// -------------------------
 	

@@ -17,10 +17,6 @@ public class World {
 	Inventory inventory;
 
 	public World() {
-		createDemoWorld();
-	}
-
-	public void createDemoWorld() {
 		level = new Level();
 		puffle = new Puffle(new Vector2(1, 2));
 		inventory = new Inventory();
