@@ -7,10 +7,13 @@ import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.math.Intersector;
+import com.badlogic.gdx.math.Rectangle;
 import com.mygdx.puffles.Puffles;
 
 import controllers.EditorController;
 import entities.Editor;
+import entities.Inventory;
 import entities.World;
 
 public class EditorScreen implements Screen, InputProcessor {
@@ -114,16 +117,32 @@ public class EditorScreen implements Screen, InputProcessor {
 	public boolean touchDown(int screenX, int screenY, int pointer, int button) {
 		// convert mouse coordinates to unit coordinates
 		float ppu = renderer.getPpu();
-		int selectedX = (int)Math.floor(screenX / ppu);	
-		int selectedY = (int)Math.floor((renderer.getScreenHeight() - screenY) / ppu);
-		
-		controller.placePressed(selectedX, selectedY);
+		float x1 = Gdx.input.getX();
+		float y1 = renderer.getScreenHeight() - Gdx.input.getY();
+		Inventory inventory = game.getWorld().getInventory();
+		Rectangle rect = new Rectangle();
+	    
+		rect.setX(x1);
+		rect.setY(y1);
+		rect.width = 1;
+		rect.height = 1;
+	    if(Intersector.overlaps(rect,inventory.getBounds())){
+	    	game.setScreen(game.getGameScreen());
+			
+		}else{
+			int selectedX = (int)Math.floor(screenX / ppu);	
+			int selectedY = (int)Math.floor((renderer.getScreenHeight() - screenY) / ppu);
+			
+			controller.placePressed(selectedX, selectedY);
+		}
+
 		return true;
 	}
 
 	@Override
 	public boolean touchUp(int screenX, int screenY, int pointer, int button) {
 		// TODO Auto-generated method stub
+		
 		return false;
 	}
 

@@ -15,6 +15,7 @@ import com.badlogic.gdx.math.Vector2;
 
 import entities.Block;
 import entities.Editor;
+import entities.Inventory;
 import entities.Puffle;
 import entities.World;
 
@@ -32,9 +33,12 @@ public class WorldRenderer {
 	public static final Color GRID_COLOR = new Color(0.35f, 0.35f, 0.5f, 0);
 	public static final int MAX_DAMAGE = 2;
 	public static final FileHandle TILESET_LOCATION = Gdx.files.internal("images/textures/tileset.pack");	
+	public static final FileHandle FONTSET_LOCATION = Gdx.files.internal("images/textures/FontTileset.pack");
 	
 	private World world;
 	private Editor editor;
+	// inventory
+	private Inventory inventory;
 
 	// allows the camera to only render part of the world
 	private OrthographicCamera camera;
@@ -46,7 +50,8 @@ public class WorldRenderer {
 	private TextureRegion[] blockTextures;
 	private TextureRegion[] damageTextures;
 	private SpriteBatch spriteBatch;
-
+	private TextureRegion[] fontTextures;
+	
 	private float ppu; // pixels per unit
 	private float cameraWidth; // units
 	private float cameraHeight; // units
@@ -54,12 +59,14 @@ public class WorldRenderer {
 	public WorldRenderer(World world, Editor editor) {
 		this.world = world;
 		this.editor = editor;
+		this.inventory = world.getInventory();
 		this.camera = new OrthographicCamera();
 		this.shapeRenderer = new ShapeRenderer();
 		this.spriteBatch = new SpriteBatch();
 		this.cameraHeight = CAMERA_HEIGHT;
 		
 		// textures
+		fontTextures = new TextureRegion[11];
 		blockTextures = new TextureRegion[2];
 		damageTextures = new TextureRegion[MAX_DAMAGE];
 		loadTextures();
@@ -68,6 +75,7 @@ public class WorldRenderer {
 	/** Loads textures from texture atlas */
 	private void loadTextures() {
 		TextureAtlas atlas = new TextureAtlas(TILESET_LOCATION);
+		TextureAtlas fontAtlas = new TextureAtlas(FONTSET_LOCATION);
 		puffleTexture = atlas.findRegion("player");
 	
 		blockTextures[0] = atlas.findRegion("stone");
@@ -76,6 +84,19 @@ public class WorldRenderer {
 		for (int i = 0; i < MAX_DAMAGE; i++ ) {
 			damageTextures[i] = atlas.findRegion("crack" + (i + 1));
 		}
+		//load Fonts
+		fontTextures[0] = fontAtlas.findRegion("0");
+		fontTextures[1] = fontAtlas.findRegion("1");
+		fontTextures[2] = fontAtlas.findRegion("2");
+		fontTextures[3] = fontAtlas.findRegion("3");
+		fontTextures[4] = fontAtlas.findRegion("4");
+		fontTextures[5] = fontAtlas.findRegion("5");
+		fontTextures[6] = fontAtlas.findRegion("6");
+		fontTextures[7] = fontAtlas.findRegion("6");
+		fontTextures[8] = fontAtlas.findRegion("7");
+		fontTextures[8] = fontAtlas.findRegion("8");
+		fontTextures[9] = fontAtlas.findRegion("9");
+		fontTextures[10] = fontAtlas.findRegion("+");
 	}
 	
 	/** Scales the size of the camera to the size of the screen */
@@ -99,12 +120,15 @@ public class WorldRenderer {
 		drawBlocks();
 		drawPuffle();                                                                                          
 		spriteBatch.end();
+		
+		InventoryDisplay();
 		if (editor != null) {
 			drawEditor();
 			spriteBatch.begin();
 			drawPlacedBlocks();
 			spriteBatch.end();
 		}
+		
 		//debug();
 	}
 
@@ -121,8 +145,25 @@ public class WorldRenderer {
 						block.getPosition().y * ppu, blockSize, blockSize);
 			}
 		}
+		inventory.setSize(Block.SIZE * ppu/2f);
 	}
-
+	private void InventoryDisplay() {
+		float size = inventory.getBounds().width;
+		// getting inventory 
+		
+			spriteBatch.begin();
+			//update inventory location
+			Vector2 vector = new Vector2();
+			vector.set((cameraWidth/10f)*ppu,((cameraHeight/10)*9.5f)*ppu);
+			inventory.setPosition(vector);
+			
+			// drawing inventory
+			spriteBatch.draw(blockTextures[1],vector.x,vector.y,size,size );
+			spriteBatch.draw(fontTextures[Inventory.getInventory()],vector.x,vector.y,size,size );
+			spriteBatch.end();
+		
+	}
+	
 	private void drawPuffle() {
 		Puffle puffle = world.getPuffle();
 		float puffleSize = (Puffle.RADIUS * 2) * ppu;

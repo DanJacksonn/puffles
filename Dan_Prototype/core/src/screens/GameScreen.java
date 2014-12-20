@@ -7,10 +7,13 @@ import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.math.Intersector;
+import com.badlogic.gdx.math.Rectangle;
 import com.mygdx.puffles.Puffles;
 
 import controllers.PuffleController;
 import entities.Editor;
+import entities.Inventory;
 import entities.World;
 
 public class GameScreen implements Screen, InputProcessor {
@@ -20,7 +23,7 @@ public class GameScreen implements Screen, InputProcessor {
 	 */
 	
 	private Puffles game;
-	
+	private World world;
 	// processes inputs and character movement
 	private PuffleController controller;
 	
@@ -122,7 +125,22 @@ public class GameScreen implements Screen, InputProcessor {
 	@Override
 	public boolean touchDown(int screenX, int screenY, int pointer, int button) {
 		// screen touched- jump!
-		controller.jumpPressed();
+		float ppu = renderer.getPpu();
+		float x1 = Gdx.input.getX();
+		float y1 = renderer.getScreenHeight() - Gdx.input.getY();
+		Inventory inventory = game.getWorld().getInventory();
+		Rectangle rect = new Rectangle();
+	    
+		rect.setX(x1);
+		rect.setY(y1);
+		rect.width = 1;
+		rect.height = 1;
+	    if(Intersector.overlaps(rect,inventory.getBounds())){
+	    	game.setScreen(game.getEditorScreen());
+			
+		}else{
+			controller.jumpPressed();
+		}
 		return true;
 	}
 
