@@ -118,15 +118,16 @@ public class EditorScreen implements Screen, InputProcessor {
 		// convert mouse coordinates to unit coordinates
 		float ppu = renderer.getPpu();
 		float x1 = Gdx.input.getX();
-		float y1 = renderer.getScreenHeight() - Gdx.input.getY();
+		float y1 = Gdx.input.getY();
 		Inventory inventory = game.getWorld().getInventory();
 		Rectangle rect = new Rectangle();
-	    
-		rect.setX(x1);
-		rect.setY(y1);
+	    System.out.println(inventory.getBounds());
+		rect.setX(x1/ppu);
+		rect.setY(y1/ppu);
 		rect.width = 1;
 		rect.height = 1;
 	    if(Intersector.overlaps(rect,inventory.getBounds())){
+	    	
 	    	game.setScreen(game.getGameScreen());
 			
 		}else{
