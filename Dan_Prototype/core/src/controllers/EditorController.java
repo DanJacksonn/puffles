@@ -79,6 +79,7 @@ public class EditorController {
 	public void applyEdits() {
 		// switch back to game screen
 		resetKeys();
+		
 		// add placed blocks to the world
 		level.addBlocks(editor.getPlacedBlocks());
 		editor.clearPlacedBlocks();

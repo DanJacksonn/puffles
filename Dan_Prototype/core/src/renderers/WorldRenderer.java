@@ -11,6 +11,8 @@ import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
+import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.math.Vector2;
 
 import entities.Block;
 import entities.Editor;
@@ -21,8 +23,8 @@ import entities.World;
 public class WorldRenderer {
 
 	/**
-	 * This class renders the game world to the screen. -Each block in the game
-	 * has the size 1 unit -All other images are scaled to this
+	 * This class renders the game world to the screen. Each block in the game
+	 * has the size 1 unit: all other images are scaled to this.
 	 */
 
 	// file locations
@@ -37,7 +39,8 @@ public class WorldRenderer {
 	public static final Color OVERLAY_COLOR = new Color(0.5f, 0.5f, 0.7f, 0.4f);
 	public static final Color GRID_COLOR = new Color(0.35f, 0.35f, 0.5f, 0);
 
-	public static final float CAMERA_HEIGHT = 10f; // units
+	public static final float CAMERA_HEIGHT = 11f; // units
+	public static final float SCROLL_GAP = 5f;
 	public static final int MAX_BLOCK_TYPES = 2;
 	public static final int MAX_DAMAGE = 2;
 
@@ -58,6 +61,7 @@ public class WorldRenderer {
 	BitmapFont font;
 
 	private float ppu; // pixels per unit
+	private Vector2 cameraPosition; // bottom left of camera
 	private float cameraWidth; // units
 	private float cameraHeight; // units
 
@@ -66,9 +70,10 @@ public class WorldRenderer {
 		this.world = world;
 		this.editor = editor;
 
-		// load renderer tools
+		// load render tools
 		this.camera = new OrthographicCamera();
 		this.cameraHeight = CAMERA_HEIGHT;
+		this.cameraPosition = new Vector2(0, 0);
 		this.shapeRenderer = new ShapeRenderer();
 		this.spriteBatch = new SpriteBatch();
 
@@ -106,15 +111,59 @@ public class WorldRenderer {
 		// update camera viewport
 		camera.viewportHeight = screenHeight;
 		camera.viewportWidth = screenWidth;
-		camera.position.set(screenWidth / 2f, screenHeight / 2f, 0);
-		camera.update();
+	}
 
-		// update render tools to fit new camera size
+	public void updateCameraPosition() {
+		Vector2 pufflePosition = world.getPuffle().getPosition();
+		
+		// if puffle is near sides of camera
+		if (pufflePosition.x - SCROLL_GAP < cameraPosition.x) {
+			// move camera left
+			cameraPosition.x = pufflePosition.x - SCROLL_GAP;
+		} else if (pufflePosition.x + SCROLL_GAP > cameraPosition.x + cameraWidth) {
+			// move camera right
+			cameraPosition.x = (pufflePosition.x - cameraWidth) + SCROLL_GAP;
+		}
+		
+		// if camera is outside of the world
+		if (cameraPosition.x < 0) {
+			// snap to left of world
+			cameraPosition.x = 0;
+			// snap to right of world
+		} else if (cameraPosition.x + cameraWidth > world.getLevel().getWidth()) {
+			cameraPosition.x = world.getLevel().getWidth() - cameraPosition.x;
+		}
+		
+		// if puffle is near top/bottom of camera
+		if (pufflePosition.y - SCROLL_GAP < cameraPosition.y) {
+			// move camera down
+			cameraPosition.y = pufflePosition.y - SCROLL_GAP;
+		} else if (pufflePosition.y + SCROLL_GAP > cameraPosition.y + cameraHeight) {
+			// move camera up
+			cameraPosition.y = (pufflePosition.y - cameraHeight) + SCROLL_GAP;
+		}
+		
+		// if camera is outside of the world
+		if (cameraPosition.y < 0) {
+			// snap to bottom of world
+			cameraPosition.y = 0;
+		} else if (cameraPosition.y + cameraHeight > world.getLevel().getHeight()) {
+			// snap to top of world
+			cameraPosition.y = world.getLevel().getHeight() - cameraPosition.y;
+		}
+		
+		// set camera position
+		camera.position.set((cameraPosition.x + (cameraWidth / 2)) * ppu, (cameraPosition.y + (cameraHeight / 2)) * ppu, 0);
+
+		// update camera and render tools
+		camera.update();
 		spriteBatch.setProjectionMatrix(camera.combined);
 		shapeRenderer.setProjectionMatrix(camera.combined);
 	}
 
 	public void render() {
+		updateCameraPosition();
+
 		// draw world
 		spriteBatch.begin();
 		drawBlocks();
@@ -164,7 +213,7 @@ public class WorldRenderer {
 	}
 
 	private void drawInventory(Inventory inventory) {
-		
+
 		// store size of inventory
 		float invWidth = inventory.getBounds().width * ppu;
 		float invHeight = inventory.getBounds().height * ppu;
@@ -196,23 +245,26 @@ public class WorldRenderer {
 		spriteBatch.end();
 	}
 
-	private void drawEditor() {
+	private void drawEditor() {		
 		// draw overlay
 		Gdx.gl.glEnable(GL20.GL_BLEND);
 		shapeRenderer.setColor(OVERLAY_COLOR);
 		shapeRenderer.begin(ShapeType.Filled);
-		shapeRenderer.rect(0, 0, cameraWidth * ppu, cameraHeight * ppu);
+		shapeRenderer.rect(cameraPosition.x * ppu, cameraPosition.y * ppu, cameraWidth * ppu, cameraHeight * ppu);
 		shapeRenderer.end();
 		Gdx.gl.glDisable(GL20.GL_BLEND);
 
+		float gridLeft = (float) Math.ceil(cameraPosition.x);
+		float gridBottom = (float) Math.ceil(cameraPosition.y);
+		
 		// draw grid
 		shapeRenderer.setColor(GRID_COLOR);
 		shapeRenderer.begin(ShapeType.Line);
-		for (int row = 0; row < cameraWidth; row++) {
-			shapeRenderer.line(row * ppu, 0, row * ppu, cameraHeight * ppu);
+		for (int x = 0; x < cameraWidth; x++) {
+			shapeRenderer.line((gridLeft + x) * ppu, cameraPosition.y * ppu, (gridLeft + x) * ppu, (cameraPosition.y + cameraHeight) * ppu);
 		}
-		for (int col = 0; col < cameraHeight; col++) {
-			shapeRenderer.line(0, col * ppu, cameraWidth * ppu, col * ppu);
+		for (int y = 0; y < cameraHeight; y++) {
+			shapeRenderer.line(cameraPosition.x * ppu, (gridBottom + y) * ppu, (cameraPosition.x + cameraWidth) * ppu, (gridBottom + y) * ppu);
 		}
 		shapeRenderer.end();
 	}
@@ -221,19 +273,26 @@ public class WorldRenderer {
 		spriteBatch.begin();
 		// draw placeable blocks to screen
 		for (Block block : editor.getPlacedBlocks()) {
-		float blockSize = Block.SIZE * ppu;
+			float blockSize = Block.SIZE * ppu;
 			spriteBatch.draw(blockTextures[block.getBlockID()],
 					block.getPosition().x * ppu, block.getPosition().y * ppu,
 					blockSize, blockSize);
 		}
 		spriteBatch.end();
 	}
-
+	
+	// Getters ------------
 	public float getPpu() {
 		return ppu;
 	}
 
+	public Vector2 getCameraPosition() {
+		return cameraPosition;
+	}
+	
 	public float getCameraHeight() {
 		return cameraHeight;
 	}
+	
+	// --------------------
 }

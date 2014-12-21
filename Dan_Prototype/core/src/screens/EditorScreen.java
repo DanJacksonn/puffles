@@ -136,9 +136,9 @@ public class EditorScreen implements Screen, InputProcessor {
 			// switch to editor more
 			game.setScreen(game.getGameScreen());
 		} else {
-			int selectedX = (int) Math.floor(clickX);
+			int selectedX = (int) Math.floor(renderer.getCameraPosition().x + clickX);
 			int selectedY = (int) Math
-					.floor(renderer.getCameraHeight() - clickY);
+					.floor(renderer.getCameraPosition().y + renderer.getCameraHeight() - clickY);
 			controller.placePressed(selectedX, selectedY);
 		}
 		return true;
