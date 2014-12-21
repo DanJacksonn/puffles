@@ -79,7 +79,7 @@ public class WorldRenderer {
 		// load render tools
 		this.camera = new OrthographicCamera();
 		this.cameraHeight = CAMERA_HEIGHT;
-		this.cameraPosition = new Vector2(0, 0);
+		this.cameraPosition = new Vector2(world.getPuffle().getPosition().x, world.getPuffle().getPosition().y);
 		this.shapeRenderer = new ShapeRenderer();
 		this.spriteBatch = new SpriteBatch();
 
@@ -157,7 +157,7 @@ public class WorldRenderer {
 		} else if (cameraPosition.y + cameraHeight > world.getLevel()
 				.getHeight()) {
 			// snap to top of world
-			cameraPosition.y = world.getLevel().getHeight() - cameraPosition.y;
+			cameraPosition.y = world.getLevel().getHeight() - cameraHeight;
 		}
 
 		// set camera position
