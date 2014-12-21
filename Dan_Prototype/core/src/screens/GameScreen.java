@@ -126,17 +126,19 @@ public class GameScreen implements Screen, InputProcessor {
 	public boolean touchDown(int screenX, int screenY, int pointer, int button) {
 		// screen touched- jump!
 		float ppu = renderer.getPpu();
-		float x1 = Gdx.input.getX();
-		float y1 =  Gdx.input.getY();
+		float inventoryLocationX;
+		float inventoryLocationY;
+		float inventoryWidth;
+		float inventoryHeight;
 		Inventory inventory = game.getWorld().getInventory();
-		Rectangle rect = new Rectangle();
-		rect.setX(x1/ppu);
-		rect.setY(y1/ppu);
-		rect.width = 1;
-		rect.height = 1;
-	    if(Intersector.overlaps(rect,inventory.getBounds())){
-	    	game.setScreen(game.getEditorScreen());
-			
+		inventoryLocationX = inventory.getBounds().x;
+		inventoryLocationY = inventory.getBounds().y;
+		inventoryWidth = inventory.getBounds().width;
+		inventoryHeight = inventory.getBounds().height;
+		if (screenX/ppu > inventoryLocationX && screenX/ppu < inventoryLocationX + inventoryWidth){
+			if (screenY/ppu > inventoryLocationY && screenY/ppu < inventoryLocationY + inventoryHeight){
+				game.setScreen(game.getEditorScreen());
+			}
 		}else{
 			controller.jumpPressed();
 		}

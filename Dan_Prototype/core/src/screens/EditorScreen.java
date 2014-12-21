@@ -115,31 +115,28 @@ public class EditorScreen implements Screen, InputProcessor {
 
 	@Override
 	public boolean touchDown(int screenX, int screenY, int pointer, int button) {
-		// convert mouse coordinates to unit coordinates
+		// screen touched- jump!
 		float ppu = renderer.getPpu();
-		float x1 = Gdx.input.getX();
-		float y1 = Gdx.input.getY();
+		float inventoryLocationX;
+		float inventoryLocationY;
+		float inventoryWidth;
+		float inventoryHeight;
 		Inventory inventory = game.getWorld().getInventory();
-		Rectangle rect = new Rectangle();
-	    System.out.println(inventory.getBounds());
-		rect.setX(x1/ppu);
-		rect.setY(y1/ppu);
-		rect.width = 1;
-		rect.height = 1;
-	    if(Intersector.overlaps(rect,inventory.getBounds())){
-	    	
-	    	game.setScreen(game.getGameScreen());
-			
+		inventoryLocationX = inventory.getBounds().x;
+		inventoryLocationY = inventory.getBounds().y;
+		inventoryWidth = inventory.getBounds().width;
+		inventoryHeight = inventory.getBounds().height;
+		if (screenX/ppu > inventoryLocationX && screenX/ppu < inventoryLocationX + inventoryWidth){
+			if (screenY/ppu > inventoryLocationY && screenY/ppu < inventoryLocationY + inventoryHeight){
+				game.setScreen(game.getGameScreen());
+			}
 		}else{
 			int selectedX = (int)Math.floor(screenX / ppu);	
 			int selectedY = (int)Math.floor((renderer.getScreenHeight() - screenY) / ppu);
-			
 			controller.placePressed(selectedX, selectedY);
 		}
-
 		return true;
 	}
-
 	@Override
 	public boolean touchUp(int screenX, int screenY, int pointer, int button) {
 		// TODO Auto-generated method stub
