@@ -5,6 +5,7 @@ import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
@@ -13,6 +14,7 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.math.Vector3;
 
 import entities.Block;
 import entities.Editor;
@@ -28,6 +30,8 @@ public class WorldRenderer {
 	 */
 
 	// file locations
+	public static final FileHandle BACKGROUND_LOCATION = Gdx.files
+			.internal("images/background.png");
 	public static final FileHandle TILESET_LOCATION = Gdx.files
 			.internal("images/textures/tileset.pack");
 	public static final FileHandle FONT_FNT_LOCATION = Gdx.files
@@ -58,6 +62,8 @@ public class WorldRenderer {
 	private TextureRegion[] blockTextures;
 	private TextureRegion[] damageTextures;
 	private TextureRegion puffleTexture;
+	private Texture backgroundTexture;
+	private float backgroundWidth;
 	BitmapFont font;
 
 	private float ppu; // pixels per unit
@@ -78,8 +84,11 @@ public class WorldRenderer {
 		this.spriteBatch = new SpriteBatch();
 
 		// load textures
-		blockTextures = new TextureRegion[MAX_BLOCK_TYPES];
-		damageTextures = new TextureRegion[MAX_DAMAGE];
+		this.blockTextures = new TextureRegion[MAX_BLOCK_TYPES];
+		this.damageTextures = new TextureRegion[MAX_DAMAGE];
+		this.backgroundTexture = new Texture(BACKGROUND_LOCATION);
+		this.backgroundWidth = (cameraHeight * backgroundTexture.getWidth())
+				/ backgroundTexture.getHeight();
 		loadTextures();
 
 		// load font
@@ -115,16 +124,17 @@ public class WorldRenderer {
 
 	public void updateCameraPosition() {
 		Vector2 pufflePosition = world.getPuffle().getPosition();
-		
+
 		// if puffle is near sides of camera
 		if (pufflePosition.x - SCROLL_GAP < cameraPosition.x) {
 			// move camera left
 			cameraPosition.x = pufflePosition.x - SCROLL_GAP;
-		} else if (pufflePosition.x + SCROLL_GAP > cameraPosition.x + cameraWidth) {
+		} else if (pufflePosition.x + SCROLL_GAP > cameraPosition.x
+				+ cameraWidth) {
 			// move camera right
 			cameraPosition.x = (pufflePosition.x - cameraWidth) + SCROLL_GAP;
 		}
-		
+
 		// if camera is outside of the world
 		if (cameraPosition.x < 0) {
 			// snap to left of world
@@ -133,27 +143,30 @@ public class WorldRenderer {
 		} else if (cameraPosition.x + cameraWidth > world.getLevel().getWidth()) {
 			cameraPosition.x = world.getLevel().getWidth() - cameraPosition.x;
 		}
-		
+
 		// if puffle is near top/bottom of camera
 		if (pufflePosition.y - SCROLL_GAP < cameraPosition.y) {
 			// move camera down
 			cameraPosition.y = pufflePosition.y - SCROLL_GAP;
-		} else if (pufflePosition.y + SCROLL_GAP > cameraPosition.y + cameraHeight) {
+		} else if (pufflePosition.y + SCROLL_GAP > cameraPosition.y
+				+ cameraHeight) {
 			// move camera up
 			cameraPosition.y = (pufflePosition.y - cameraHeight) + SCROLL_GAP;
 		}
-		
+
 		// if camera is outside of the world
 		if (cameraPosition.y < 0) {
 			// snap to bottom of world
 			cameraPosition.y = 0;
-		} else if (cameraPosition.y + cameraHeight > world.getLevel().getHeight()) {
+		} else if (cameraPosition.y + cameraHeight > world.getLevel()
+				.getHeight()) {
 			// snap to top of world
 			cameraPosition.y = world.getLevel().getHeight() - cameraPosition.y;
 		}
-		
+
 		// set camera position
-		camera.position.set((cameraPosition.x + (cameraWidth / 2)) * ppu, (cameraPosition.y + (cameraHeight / 2)) * ppu, 0);
+		camera.position.set((cameraPosition.x + (cameraWidth / 2)) * ppu,
+				(cameraPosition.y + (cameraHeight / 2)) * ppu, 0);
 
 		// update camera and render tools
 		camera.update();
@@ -166,6 +179,7 @@ public class WorldRenderer {
 
 		// draw world
 		spriteBatch.begin();
+		drawBackground();
 		drawBlocks();
 		drawPuffle();
 		spriteBatch.end();
@@ -181,6 +195,12 @@ public class WorldRenderer {
 		if (!inventory.isEmpty()) {
 			drawInventory(inventory);
 		}
+	}
+
+	private void drawBackground() {
+		spriteBatch.draw(backgroundTexture, cameraPosition.x * ppu,
+				cameraPosition.y * ppu, backgroundWidth * ppu, cameraHeight
+						* ppu);
 	}
 
 	private void drawBlocks() {
@@ -245,26 +265,31 @@ public class WorldRenderer {
 		spriteBatch.end();
 	}
 
-	private void drawEditor() {		
+	private void drawEditor() {
 		// draw overlay
 		Gdx.gl.glEnable(GL20.GL_BLEND);
 		shapeRenderer.setColor(OVERLAY_COLOR);
 		shapeRenderer.begin(ShapeType.Filled);
-		shapeRenderer.rect(cameraPosition.x * ppu, cameraPosition.y * ppu, cameraWidth * ppu, cameraHeight * ppu);
+		shapeRenderer.rect(cameraPosition.x * ppu, cameraPosition.y * ppu,
+				cameraWidth * ppu, cameraHeight * ppu);
 		shapeRenderer.end();
 		Gdx.gl.glDisable(GL20.GL_BLEND);
 
 		float gridLeft = (float) Math.ceil(cameraPosition.x);
 		float gridBottom = (float) Math.ceil(cameraPosition.y);
-		
+
 		// draw grid
 		shapeRenderer.setColor(GRID_COLOR);
 		shapeRenderer.begin(ShapeType.Line);
 		for (int x = 0; x < cameraWidth; x++) {
-			shapeRenderer.line((gridLeft + x) * ppu, cameraPosition.y * ppu, (gridLeft + x) * ppu, (cameraPosition.y + cameraHeight) * ppu);
+			shapeRenderer.line((gridLeft + x) * ppu, cameraPosition.y * ppu,
+					(gridLeft + x) * ppu, (cameraPosition.y + cameraHeight)
+							* ppu);
 		}
 		for (int y = 0; y < cameraHeight; y++) {
-			shapeRenderer.line(cameraPosition.x * ppu, (gridBottom + y) * ppu, (cameraPosition.x + cameraWidth) * ppu, (gridBottom + y) * ppu);
+			shapeRenderer.line(cameraPosition.x * ppu, (gridBottom + y) * ppu,
+					(cameraPosition.x + cameraWidth) * ppu, (gridBottom + y)
+							* ppu);
 		}
 		shapeRenderer.end();
 	}
@@ -280,7 +305,7 @@ public class WorldRenderer {
 		}
 		spriteBatch.end();
 	}
-	
+
 	// Getters ------------
 	public float getPpu() {
 		return ppu;
@@ -289,10 +314,10 @@ public class WorldRenderer {
 	public Vector2 getCameraPosition() {
 		return cameraPosition;
 	}
-	
+
 	public float getCameraHeight() {
 		return cameraHeight;
 	}
-	
+
 	// --------------------
 }
