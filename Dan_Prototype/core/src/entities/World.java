@@ -18,7 +18,7 @@ public class World {
 
 	public World() {
 		level = new Level();
-		puffle = new Puffle(new Vector2(1, 2));
+		puffle = new Puffle(new Vector2(2, 5));
 		inventory = new Inventory();
 	}
 

@@ -17,7 +17,7 @@ public class Level {
 	private Block[][] blocks;
 
 	public Level() {
-		this.levelID = 1;
+		this.levelID = 2;
 		loadLevelText();
 	}
 

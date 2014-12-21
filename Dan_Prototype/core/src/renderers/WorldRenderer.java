@@ -86,15 +86,18 @@ public class WorldRenderer {
 		// load textures
 		this.blockTextures = new TextureRegion[MAX_BLOCK_TYPES];
 		this.damageTextures = new TextureRegion[MAX_DAMAGE];
-		this.backgroundTexture = new Texture(BACKGROUND_LOCATION);
-		this.backgroundWidth = (cameraHeight * backgroundTexture.getWidth())
-				/ backgroundTexture.getHeight();
 		loadTextures();
 
 		// load font
 		this.font = new BitmapFont(FONT_FNT_LOCATION, FONT_PNG_LOCATION, false);
 		font.setScale(0.5f);
 		font.setColor(Color.WHITE);
+		
+		// load background
+		this.backgroundTexture = new Texture(BACKGROUND_LOCATION);
+		// calculate how much of background to render on width
+		this.backgroundWidth = (cameraHeight * backgroundTexture.getWidth())
+				/ backgroundTexture.getHeight();
 	}
 
 	/** Loads textures from texture atlas */
@@ -124,24 +127,17 @@ public class WorldRenderer {
 
 	public void updateCameraPosition() {
 		Vector2 pufflePosition = world.getPuffle().getPosition();
-
-		// if puffle is near sides of camera
-		if (pufflePosition.x - SCROLL_GAP < cameraPosition.x) {
-			// move camera left
-			cameraPosition.x = pufflePosition.x - SCROLL_GAP;
-		} else if (pufflePosition.x + SCROLL_GAP > cameraPosition.x
-				+ cameraWidth) {
-			// move camera right
-			cameraPosition.x = (pufflePosition.x - cameraWidth) + SCROLL_GAP;
-		}
+		
+		// keep puffle in middle of camera on x axis
+		cameraPosition.x = pufflePosition.x - (cameraWidth / 2);
 
 		// if camera is outside of the world
 		if (cameraPosition.x < 0) {
 			// snap to left of world
 			cameraPosition.x = 0;
-			// snap to right of world
 		} else if (cameraPosition.x + cameraWidth > world.getLevel().getWidth()) {
-			cameraPosition.x = world.getLevel().getWidth() - cameraPosition.x;
+			// snap to right of world
+			cameraPosition.x = world.getLevel().getWidth() - cameraWidth;
 		}
 
 		// if puffle is near top/bottom of camera
@@ -233,14 +229,13 @@ public class WorldRenderer {
 	}
 
 	private void drawInventory(Inventory inventory) {
-
 		// store size of inventory
 		float invWidth = inventory.getBounds().width * ppu;
 		float invHeight = inventory.getBounds().height * ppu;
 
 		// store position of inventory
-		float invXPosition = inventory.getBounds().x * ppu;
-		float invYPosition = ((cameraHeight - inventory.getBounds().y) * ppu)
+		float invXPosition = (cameraPosition.x + inventory.getBounds().x) * ppu;
+		float invYPosition = ((cameraPosition.y + cameraHeight - inventory.getBounds().y) * ppu)
 				- invHeight;
 
 		// store number of blocks in inventory as string
