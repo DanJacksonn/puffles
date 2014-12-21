@@ -128,7 +128,10 @@ public class WorldRenderer {
 		}
 
 		// draw inventory
-		drawInventory();
+		Inventory inventory = world.getInventory();
+		if (!inventory.isEmpty()) {
+			drawInventory(inventory);
+		}
 	}
 
 	private void drawBlocks() {
@@ -160,8 +163,7 @@ public class WorldRenderer {
 				puffle.getRotation(), true);
 	}
 
-	private void drawInventory() {
-		Inventory inventory = world.getInventory();
+	private void drawInventory(Inventory inventory) {
 		
 		// store size of inventory
 		float invWidth = inventory.getBounds().width * ppu;
@@ -231,7 +233,7 @@ public class WorldRenderer {
 		return ppu;
 	}
 
-	public float getScreenHeight() {
-		return cameraHeight * ppu;
+	public float getCameraHeight() {
+		return cameraHeight;
 	}
 }

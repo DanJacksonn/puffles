@@ -21,27 +21,27 @@ public class GameScreen implements Screen, InputProcessor {
 	/**
 	 * This class renders the world to the screen and processes inputs.
 	 */
-	
+
 	private Puffles game;
-	
+
 	// processes inputs and character movement
 	private PuffleController controller;
-	
+
 	// draws world to the screen
 	private WorldRenderer renderer;
 
 	public GameScreen(Puffles game) {
 		this.game = game;
 	}
-	
+
 	@Override
 	/** Called when this screen becomes the current screen for the game **/
 	public void show() {
 		controller = new PuffleController(game.getWorld());
-		
+
 		// render world with editing disabled
 		renderer = new WorldRenderer(game.getWorld(), null);
-		
+
 		// set this screen as current input processor
 		Gdx.input.setInputProcessor(this);
 	}
@@ -124,22 +124,27 @@ public class GameScreen implements Screen, InputProcessor {
 
 	@Override
 	public boolean touchDown(int screenX, int screenY, int pointer, int button) {
-		// screen touched- jump!
-		float ppu = renderer.getPpu();
-		float inventoryLocationX;
-		float inventoryLocationY;
-		float inventoryWidth;
-		float inventoryHeight;
+		// store click location
+		float clickX = screenX / renderer.getPpu();
+		float clickY = screenY / renderer.getPpu();
+		
+		// store inventory location
 		Inventory inventory = game.getWorld().getInventory();
-		inventoryLocationX = inventory.getBounds().x;
-		inventoryLocationY = inventory.getBounds().y;
-		inventoryWidth = inventory.getBounds().width;
-		inventoryHeight = inventory.getBounds().height;
-		if (screenX/ppu > inventoryLocationX && screenX/ppu < inventoryLocationX + inventoryWidth){
-			if (screenY/ppu > inventoryLocationY && screenY/ppu < inventoryLocationY + inventoryHeight){
-				game.setScreen(game.getEditorScreen());
-			}
-		}else{
+		float inventoryLocationX = inventory.getBounds().x;
+		float inventoryLocationY = inventory.getBounds().y;
+		float inventoryWidth = inventory.getBounds().width;
+		float inventoryHeight = inventory.getBounds().height;
+
+		// if inventory clicked
+		if (!inventory.isEmpty()
+				&& clickX > inventoryLocationX
+				&& clickX < (inventoryLocationX + inventoryWidth)
+				&& clickY > inventoryLocationY
+				&& clickY < inventoryLocationY + inventoryHeight) {
+			// switch to editor more
+			game.setScreen(game.getEditorScreen());
+		} else {
+			// jump!
 			controller.jumpPressed();
 		}
 		return true;

@@ -19,13 +19,13 @@ import entities.World;
 public class EditorScreen implements Screen, InputProcessor {
 
 	/**
-	 * This class controls processes whilst the game is running. 
-	 * -Renders the world to the screen and processes inputs.
+	 * This class controls processes whilst the game is running. -Renders the
+	 * world to the screen and processes inputs.
 	 */
 
 	private Puffles game;
 	private Editor editor;
-	
+
 	// draws world to the screen
 	private WorldRenderer renderer;
 
@@ -36,15 +36,15 @@ public class EditorScreen implements Screen, InputProcessor {
 		this.game = game;
 		this.editor = new Editor();
 	}
-	
+
 	@Override
 	/** Called when this screen becomes the current screen for the game **/
 	public void show() {
 		controller = new EditorController(game.getWorld(), editor);
-		
+
 		// renmakes the controllersder world with editing enabled
 		renderer = new WorldRenderer(game.getWorld(), editor);
-		
+
 		// set this screen as current input processor
 		Gdx.input.setInputProcessor(this);
 	}
@@ -94,10 +94,11 @@ public class EditorScreen implements Screen, InputProcessor {
 	@Override
 	public boolean keyDown(int keycode) {
 		// keyboard key pressed
-		if (keycode == Keys.E)
+		if (keycode == Keys.E) {
 			controller.applyEdits();
 			// resume game
 			game.setScreen(game.getGameScreen());
+		}
 		return true;
 	}
 
@@ -115,32 +116,38 @@ public class EditorScreen implements Screen, InputProcessor {
 
 	@Override
 	public boolean touchDown(int screenX, int screenY, int pointer, int button) {
-		// screen touched- jump!
-		float ppu = renderer.getPpu();
-		float inventoryLocationX;
-		float inventoryLocationY;
-		float inventoryWidth;
-		float inventoryHeight;
+		// store click location
+		float clickX = screenX / renderer.getPpu();
+		float clickY = screenY / renderer.getPpu();
+
+		// store inventory location
 		Inventory inventory = game.getWorld().getInventory();
-		inventoryLocationX = inventory.getBounds().x;
-		inventoryLocationY = inventory.getBounds().y;
-		inventoryWidth = inventory.getBounds().width;
-		inventoryHeight = inventory.getBounds().height;
-		if (screenX/ppu > inventoryLocationX && screenX/ppu < inventoryLocationX + inventoryWidth){
-			if (screenY/ppu > inventoryLocationY && screenY/ppu < inventoryLocationY + inventoryHeight){
-				game.setScreen(game.getGameScreen());
-			}
-		}else{
-			int selectedX = (int)Math.floor(screenX / ppu);	
-			int selectedY = (int)Math.floor((renderer.getScreenHeight() - screenY) / ppu);
+		float inventoryLocationX = inventory.getBounds().x;
+		float inventoryLocationY = inventory.getBounds().y;
+		float inventoryWidth = inventory.getBounds().width;
+		float inventoryHeight = inventory.getBounds().height;
+
+		// if inventory clicked
+		if (!inventory.isEmpty()
+				&& clickX > inventoryLocationX
+				&& clickX < (inventoryLocationX + inventoryWidth)
+				&& clickY > inventoryLocationY
+				&& clickY < inventoryLocationY + inventoryHeight) {
+			// switch to editor more
+			game.setScreen(game.getGameScreen());
+		} else {
+			int selectedX = (int) Math.floor(clickX);
+			int selectedY = (int) Math
+					.floor(renderer.getCameraHeight() - clickY);
 			controller.placePressed(selectedX, selectedY);
 		}
 		return true;
 	}
+
 	@Override
 	public boolean touchUp(int screenX, int screenY, int pointer, int button) {
 		// TODO Auto-generated method stub
-		
+
 		return false;
 	}
 
@@ -163,4 +170,3 @@ public class EditorScreen implements Screen, InputProcessor {
 	}
 
 }
-

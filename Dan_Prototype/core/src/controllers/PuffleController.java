@@ -34,7 +34,7 @@ public class PuffleController {
 	private static final float FRICTION = 0.9f;
 	// vertical vectors
 	private static final float GRAVITY = -29f;
-	private static final float JUMP_SPEED = 8.9f;
+	private static final float JUMP_SPEED = 8.8f;
 
 	// world entities
 	private Puffle puffle;
