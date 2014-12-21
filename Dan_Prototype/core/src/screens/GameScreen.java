@@ -23,7 +23,7 @@ public class GameScreen implements Screen, InputProcessor {
 	 */
 	
 	private Puffles game;
-	private World world;
+	
 	// processes inputs and character movement
 	private PuffleController controller;
 	
