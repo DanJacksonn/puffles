@@ -14,6 +14,7 @@ import com.mygdx.puffles.Puffles;
 import controllers.PuffleController;
 import entities.Editor;
 import entities.Inventory;
+import entities.Settings;
 import entities.World;
 
 public class GameScreen implements Screen, InputProcessor {
@@ -131,6 +132,7 @@ public class GameScreen implements Screen, InputProcessor {
 		// store click location
 		float clickX = screenX / renderer.getPpu();
 		float clickY = screenY / renderer.getPpu();
+<<<<<<< HEAD
 
 		// store inventory location
 		Inventory inventory = game.getWorld().getInventory();
@@ -144,9 +146,18 @@ public class GameScreen implements Screen, InputProcessor {
 				&& clickX < (inventoryLocationX + inventoryWidth)
 				&& clickY > inventoryLocationY
 				&& clickY < inventoryLocationY + inventoryHeight) {
+=======
+		
+		if(testInventoryBounds(clickX,clickY)){
+>>>>>>> origin/master
 			// switch to editor more
 			game.setScreen(game.getEditorScreen());
-		} else {
+			//test for if player clicked settings button
+		} else if(testSettingsButtonBounds(clickX,clickY)){
+			
+			game.setScreen(game.getSettingScreen());
+			
+		}else{
 			// jump!
 			controller.jumpPressed();
 		}
@@ -176,6 +187,46 @@ public class GameScreen implements Screen, InputProcessor {
 	public boolean scrolled(int amount) {
 		// TODO Auto-generated method stub
 		return false;
+	}
+	public boolean testInventoryBounds(float clickX,float clickY){
+		// store inventory location
+		Inventory inventory = game.getWorld().getInventory();
+		float inventoryLocationX = inventory.getBounds().x;
+		float inventoryLocationY = inventory.getBounds().y;
+		float inventoryWidth = inventory.getBounds().width;
+		float inventoryHeight = inventory.getBounds().height;
+		// if inventory clicked
+				if (!inventory.isEmpty()
+						&& clickX > inventoryLocationX
+						&& clickX < (inventoryLocationX + inventoryWidth)
+						&& clickY > inventoryLocationY
+						&& clickY < inventoryLocationY + inventoryHeight) {
+					return true;
+					}else{
+						return false;
+					}
+				
+						
+		
+	}
+	public boolean testSettingsButtonBounds(float clickX,float clickY){
+		// store Setting location
+		Settings settings = game.getWorld().getSettings();
+		float settingsButtonLocationX = settings.getButtonBounds().x;
+		float settingsButtonLocationY = settings.getButtonBounds().y;
+		float settingsButtonWidth = settings.getButtonBounds().width;
+		float settingsButtonHeight = settings.getButtonBounds().height;
+		// if settings button clicked
+					if(clickX > settingsButtonLocationX
+						&& clickX < (settingsButtonLocationX + settingsButtonWidth)
+						&& clickY > settingsButtonLocationY
+						&& clickY < settingsButtonLocationY +  settingsButtonHeight) {
+						// just used to change box fill type in the world render to allow for testing 
+							settings.setIfSettingsOn(true);
+						return true;
+					}else{
+						return false;
+					}
 	}
 
 }

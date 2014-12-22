@@ -20,6 +20,7 @@ import entities.Block;
 import entities.Editor;
 import entities.Inventory;
 import entities.Puffle;
+import entities.Settings;
 import entities.World;
 
 public class WorldRenderer {
@@ -86,13 +87,14 @@ public class WorldRenderer {
 		// load textures
 		this.blockTextures = new TextureRegion[MAX_BLOCK_TYPES];
 		this.damageTextures = new TextureRegion[MAX_DAMAGE];
+
 		loadTextures();
 
 		// load font
 		this.font = new BitmapFont(FONT_FNT_LOCATION, FONT_PNG_LOCATION, false);
 		font.setScale(0.5f);
 		font.setColor(Color.WHITE);
-		
+
 		// load background
 		this.backgroundTexture = new Texture(BACKGROUND_LOCATION);
 		// calculate how much of background to render on width
@@ -127,16 +129,16 @@ public class WorldRenderer {
 
 	public void updateCameraPosition() {
 		Vector2 pufflePosition = world.getPuffle().getPosition();
-		
 		// keep puffle in middle of camera on x axis
 		cameraPosition.x = pufflePosition.x - (cameraWidth / 2);
 
 		// if camera is outside of the world
+
 		if (cameraPosition.x < 0) {
 			// snap to left of world
 			cameraPosition.x = 0;
+			
 		} else if (cameraPosition.x + cameraWidth > world.getLevel().getWidth()) {
-			// snap to right of world
 			cameraPosition.x = world.getLevel().getWidth() - cameraWidth;
 		}
 
@@ -191,6 +193,7 @@ public class WorldRenderer {
 		if (!inventory.isEmpty()) {
 			drawInventory(inventory);
 		}
+		drawSettings();
 	}
 
 	private void drawBackground() {
@@ -234,8 +237,8 @@ public class WorldRenderer {
 		float invHeight = inventory.getBounds().height * ppu;
 
 		// store position of inventory
-		float invXPosition = (cameraPosition.x + inventory.getBounds().x) * ppu;
-		float invYPosition = ((cameraPosition.y + cameraHeight - inventory.getBounds().y) * ppu)
+		float invXPosition = (inventory.getBounds().x + cameraPosition.x) * ppu;
+		float invYPosition = ((cameraHeight - inventory.getBounds().y + cameraPosition.y) * ppu)
 				- invHeight;
 
 		// store number of blocks in inventory as string
@@ -258,6 +261,31 @@ public class WorldRenderer {
 		// text
 		font.draw(spriteBatch, invText, textXPosition, textYPosition);
 		spriteBatch.end();
+	}
+
+	private void drawSettings() {
+		// this needs to be changed to prevent settings being stored in main ,
+		// but for the time being i wanted to get
+		// stuff working to a usefull level
+		// sets bounds for setting button
+		Settings settings = world.getSettings();
+		float settingWidth = settings.getButtonBounds().width * ppu;
+		float settingHeight = settings.getButtonBounds().height * ppu;
+		float settingButtonX = (settings.getButtonBounds().x + cameraPosition.x)
+				* ppu;
+		float settingButtonY = ((cameraHeight - settings.getButtonBounds().y + cameraPosition.y) * ppu)
+				- settingHeight;
+		// useless this will just change the box type
+		if (settings.getIfSettingsOn()) {
+			shapeRenderer.begin(ShapeType.Filled);
+		} else {
+			shapeRenderer.begin(ShapeType.Line);
+		}
+		// draws the setting button
+		shapeRenderer.setColor(1, 1, 0, 1);
+		shapeRenderer.rect(settingButtonX, settingButtonY, settingWidth,
+				settingHeight);
+		shapeRenderer.end();
 	}
 
 	private void drawEditor() {

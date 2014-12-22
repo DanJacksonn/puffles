@@ -15,11 +15,14 @@ public class World {
 	Level level;
 	Puffle puffle;
 	Inventory inventory;
-
-	public World() {
+	Settings settings;
+	public World(Settings settings) {
 		level = new Level();
 		puffle = new Puffle(new Vector2(2, 5));
 		inventory = new Inventory();
+		this.settings = settings;
+		
+		
 	}
 
 	/** Returns a list of blocks that are in the cameras window **/
@@ -74,6 +77,11 @@ public class World {
 	public Level getLevel() {
 		return level;
 	}
-
+	public Settings getSettings(){
+		
+		return settings;
+		
+		
+	}
 	// -----------------------------
 }
