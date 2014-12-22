@@ -44,7 +44,7 @@ public class WorldRenderer {
 	public static final Color GRID_COLOR = new Color(0.35f, 0.35f, 0.5f, 0);
 
 	public static final float CAMERA_HEIGHT = 11f; // units
-	public static final float SCROLL_GAP = 5f;
+	public static final float SCROLL_GAP = 3f;
 	public static final int MAX_BLOCK_TYPES = 2;
 	public static final int MAX_DAMAGE = 2;
 

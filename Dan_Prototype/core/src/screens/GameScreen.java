@@ -97,6 +97,8 @@ public class GameScreen implements Screen, InputProcessor {
 			controller.rightPressed();
 		if (keycode == Keys.W)
 			controller.jumpPressed();
+		if (keycode == Keys.SPACE)
+			controller.jumpPressed();
 		if (keycode == Keys.E) {
 			controller.resetKeys();
 			game.setScreen(game.getEditorScreen());
@@ -113,6 +115,8 @@ public class GameScreen implements Screen, InputProcessor {
 			controller.rightReleased();
 		if (keycode == Keys.W)
 			controller.jumpReleased();
+		if (keycode == Keys.SPACE)
+			controller.jumpReleased();
 		return true;
 	}
 
@@ -127,7 +131,7 @@ public class GameScreen implements Screen, InputProcessor {
 		// store click location
 		float clickX = screenX / renderer.getPpu();
 		float clickY = screenY / renderer.getPpu();
-		
+
 		// store inventory location
 		Inventory inventory = game.getWorld().getInventory();
 		float inventoryLocationX = inventory.getBounds().x;
@@ -136,8 +140,7 @@ public class GameScreen implements Screen, InputProcessor {
 		float inventoryHeight = inventory.getBounds().height;
 
 		// if inventory clicked
-		if (!inventory.isEmpty()
-				&& clickX > inventoryLocationX
+		if (!inventory.isEmpty() && clickX > inventoryLocationX
 				&& clickX < (inventoryLocationX + inventoryWidth)
 				&& clickY > inventoryLocationY
 				&& clickY < inventoryLocationY + inventoryHeight) {
