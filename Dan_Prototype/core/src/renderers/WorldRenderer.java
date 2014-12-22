@@ -12,9 +12,7 @@ import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
-import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.math.Vector3;
 
 import entities.Block;
 import entities.Editor;
@@ -45,7 +43,7 @@ public class WorldRenderer {
 	public static final Color GRID_COLOR = new Color(0.35f, 0.35f, 0.5f, 0);
 
 	public static final float CAMERA_HEIGHT = 11f; // units
-	public static final float SCROLL_GAP = 3f;
+	public static final float SCROLL_GAP = 5f;
 	public static final int MAX_BLOCK_TYPES = 2;
 	public static final int MAX_DAMAGE = 2;
 
@@ -269,12 +267,12 @@ public class WorldRenderer {
 		// stuff working to a usefull level
 		// sets bounds for setting button
 		Settings settings = world.getSettings();
-		float settingWidth = settings.getButtonBounds().width * ppu;
-		float settingHeight = settings.getButtonBounds().height * ppu;
-		float settingButtonX = (settings.getButtonBounds().x + cameraPosition.x)
+		float settingsWidth = settings.getButtonBounds().width * ppu;
+		float settingsHeight = settings.getButtonBounds().height * ppu;
+		float settingsButtonX = (settings.getButtonBounds().x + cameraPosition.x)
 				* ppu;
-		float settingButtonY = ((cameraHeight - settings.getButtonBounds().y + cameraPosition.y) * ppu)
-				- settingHeight;
+		float settingsButtonY = ((cameraHeight - settings.getButtonBounds().y + cameraPosition.y) * ppu)
+				- settingsHeight;
 		// useless this will just change the box type
 		if (settings.getIfSettingsOn()) {
 			shapeRenderer.begin(ShapeType.Filled);
@@ -283,8 +281,8 @@ public class WorldRenderer {
 		}
 		// draws the setting button
 		shapeRenderer.setColor(1, 1, 0, 1);
-		shapeRenderer.rect(settingButtonX, settingButtonY, settingWidth,
-				settingHeight);
+		shapeRenderer.rect(settingsButtonX, settingsButtonY, settingsWidth,
+				settingsHeight);
 		shapeRenderer.end();
 	}
 

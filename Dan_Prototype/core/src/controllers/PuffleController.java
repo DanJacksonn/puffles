@@ -29,8 +29,8 @@ public class PuffleController {
 	static Map<Keys, Boolean> keys = new HashMap<PuffleController.Keys, Boolean>();
 
 	// horizontal vectors
-	private static final float ROLL_ACCELERATION = 12f;
-	private static final float ROLL_SPEED = 2.7f;
+	private static final float ROLL_ACCELERATION = 11f;
+	private static final float ROLL_SPEED = 2.6f;
 	private static final float FRICTION = 0.9f;
 	// vertical vectors
 	private static final float GRAVITY = -29f;

@@ -20,7 +20,6 @@ public class Puffles extends Game {
 	@Override
 	public void create () {
 		this.world = new World(settings);
-		
 		this.gameScreen = new GameScreen(this);
 		this.editorScreen = new EditorScreen(this);
 		this.settingsScreen = new SettingsScreen(this);
