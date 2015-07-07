@@ -1,25 +1,27 @@
 package renderers;
 
+import helpers.EditorAssetLoader;
+import helpers.WorldAssetLoader;
+
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.files.FileHandle;
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
+import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 
-import entities.Block;
-import entities.Editor;
-import entities.Inventory;
-import entities.Puffle;
-import entities.Settings;
-import entities.World;
+import entities.api.IPuffle;
+import entities.impl.Block;
+import entities.impl.Editor;
+import entities.impl.Inventory;
+import entities.impl.Level;
+import entities.impl.Puffle;
+import entities.impl.World;
 
 public class WorldRenderer {
 
@@ -28,42 +30,30 @@ public class WorldRenderer {
 	 * has the size 1 unit: all other images are scaled to this.
 	 */
 
-	// file locations
-	public static final FileHandle BACKGROUND_LOCATION = Gdx.files
-			.internal("images/background.png");
-	public static final FileHandle TILESET_LOCATION = Gdx.files
-			.internal("images/textures/tileset.pack");
-	public static final FileHandle FONT_FNT_LOCATION = Gdx.files
-			.internal("data/font.fnt");
-	public static final FileHandle FONT_PNG_LOCATION = Gdx.files
-			.internal("data/font.png");
-
-	// colours
-	public static final Color OVERLAY_COLOR = new Color(0.5f, 0.5f, 0.7f, 0.4f);
-	public static final Color GRID_COLOR = new Color(0.35f, 0.35f, 0.5f, 0);
-
 	public static final float CAMERA_HEIGHT = 11f; // units
 	public static final float SCROLL_GAP = 5f;
-	public static final int MAX_BLOCK_TYPES = 2;
-	public static final int MAX_DAMAGE = 2;
 
 	private World world;
 	private Editor editor;
 
-	// allows the camera to only render part of the world
 	private OrthographicCamera camera;
-
 	private ShapeRenderer shapeRenderer;
 
 	private SpriteBatch spriteBatch;
 
-	// textures
+	// world objects
+	private Puffle puffle;
+	private Level level;
+
+	// world assets
+	private Texture backgroundTexture;
+	private float backgroundWidth;
 	private TextureRegion[] blockTextures;
 	private TextureRegion[] damageTextures;
 	private TextureRegion puffleTexture;
-	private Texture backgroundTexture;
-	private float backgroundWidth;
 	BitmapFont font;
+	private Rectangle invBounds;
+	private Vector2 invTextPos;
 
 	private float ppu; // pixels per unit
 	private Vector2 cameraPosition; // bottom left of camera
@@ -71,73 +61,52 @@ public class WorldRenderer {
 	private float cameraHeight; // units
 
 	public WorldRenderer(World world, Editor editor) {
-		// load renderables
 		this.world = world;
 		this.editor = editor;
 
 		// load render tools
 		this.camera = new OrthographicCamera();
 		this.cameraHeight = CAMERA_HEIGHT;
-		this.cameraPosition = new Vector2(world.getPuffle().getPosition().x, world.getPuffle().getPosition().y);
+		this.cameraPosition = new Vector2(world.getPuffle().getPosition().x,
+				world.getPuffle().getPosition().y);
 		this.shapeRenderer = new ShapeRenderer();
 		this.spriteBatch = new SpriteBatch();
 
-		// load textures
-		this.blockTextures = new TextureRegion[MAX_BLOCK_TYPES];
-		this.damageTextures = new TextureRegion[MAX_DAMAGE];
+		loadWorldObjects();
+		loadAssets();
+	}
 
-		loadTextures();
+	private void loadWorldObjects() {
+		this.puffle = world.getPuffle();
+		this.level = world.getLevel();
+	}
 
-		// load font
-		this.font = new BitmapFont(FONT_FNT_LOCATION, FONT_PNG_LOCATION, false);
-		font.setScale(0.5f);
-		font.setColor(Color.WHITE);
-
-		// load background
-		this.backgroundTexture = new Texture(BACKGROUND_LOCATION);
-		// calculate how much of background to render on width
+	private void loadAssets() {
+		this.backgroundTexture = WorldAssetLoader.backgroundTexture;
 		this.backgroundWidth = (cameraHeight * backgroundTexture.getWidth())
 				/ backgroundTexture.getHeight();
-	}
-
-	/** Loads textures from texture atlas */
-	private void loadTextures() {
-		TextureAtlas atlas = new TextureAtlas(TILESET_LOCATION);
-		this.puffleTexture = atlas.findRegion("player");
-
-		this.blockTextures[0] = atlas.findRegion("stone");
-		this.blockTextures[1] = atlas.findRegion("grass");
-
-		// load crack textures
-		for (int i = 0; i < damageTextures.length; i++) {
-			this.damageTextures[i] = atlas.findRegion("crack" + (i + 1));
-		}
-	}
-
-	/** Scales the size of the camera to the size of the screen */
-	public void setSize(int screenWidth, int screenHeight) {
-		// calculate number of pixels per unit
-		ppu = screenHeight / cameraHeight;
-		this.cameraWidth = screenWidth / ppu;
-
-		// update camera viewport
-		camera.viewportHeight = screenHeight;
-		camera.viewportWidth = screenWidth;
+		this.blockTextures = WorldAssetLoader.blockTextures;
+		this.damageTextures = WorldAssetLoader.damageTextures;
+		this.puffleTexture = WorldAssetLoader.puffleTexture;
+		this.font = WorldAssetLoader.font;
+		
+		this.invBounds = WorldAssetLoader.invBounds;
+		this.invTextPos = WorldAssetLoader.invTextPos;
 	}
 
 	public void updateCameraPosition() {
-		Vector2 pufflePosition = world.getPuffle().getPosition();
+		Vector2 pufflePosition = puffle.getPosition();
+
 		// keep puffle in middle of camera on x axis
 		cameraPosition.x = pufflePosition.x - (cameraWidth / 2);
 
 		// if camera is outside of the world
-
 		if (cameraPosition.x < 0) {
 			// snap to left of world
 			cameraPosition.x = 0;
-			
-		} else if (cameraPosition.x + cameraWidth > world.getLevel().getWidth()) {
-			cameraPosition.x = world.getLevel().getWidth() - cameraWidth;
+		} else if (cameraPosition.x + cameraWidth > level.getWidth()) {
+			// snap to right of world
+			cameraPosition.x = level.getWidth() - cameraWidth;
 		}
 
 		// if puffle is near top/bottom of camera
@@ -154,10 +123,9 @@ public class WorldRenderer {
 		if (cameraPosition.y < 0) {
 			// snap to bottom of world
 			cameraPosition.y = 0;
-		} else if (cameraPosition.y + cameraHeight > world.getLevel()
-				.getHeight()) {
+		} else if (cameraPosition.y + cameraHeight > level.getHeight()) {
 			// snap to top of world
-			cameraPosition.y = world.getLevel().getHeight() - cameraHeight;
+			cameraPosition.y = level.getHeight() - cameraHeight;
 		}
 
 		// set camera position
@@ -168,30 +136,6 @@ public class WorldRenderer {
 		camera.update();
 		spriteBatch.setProjectionMatrix(camera.combined);
 		shapeRenderer.setProjectionMatrix(camera.combined);
-	}
-
-	public void render() {
-		updateCameraPosition();
-
-		// draw world
-		spriteBatch.begin();
-		drawBackground();
-		drawBlocks();
-		drawPuffle();
-		spriteBatch.end();
-
-		// draw editor
-		if (editor != null) {
-			drawEditor();
-			drawPlacedBlocks();
-		}
-
-		// draw inventory
-		Inventory inventory = world.getInventory();
-		if (!inventory.isEmpty()) {
-			drawInventory(inventory);
-		}
-		drawSettings();
 	}
 
 	private void drawBackground() {
@@ -205,14 +149,14 @@ public class WorldRenderer {
 				(int) CAMERA_HEIGHT)) {
 			float blockSize = Block.SIZE * ppu;
 			// draw block to screen
-			spriteBatch.draw(blockTextures[block.getBlockID()],
-					block.getPosition().x * ppu, block.getPosition().y * ppu,
+			spriteBatch.draw(blockTextures[block.getBlockID().ordinal()],
+					block.getTilePosition().x * ppu, block.getTilePosition().y * ppu,
 					blockSize, blockSize);
 			// draw damage to screen
 			int damageValue = block.getDamageValue();
 			if (damageValue > 0) {
 				spriteBatch.draw(damageTextures[damageValue - 1],
-						block.getPosition().x * ppu, block.getPosition().y
+						block.getTilePosition().x * ppu, block.getTilePosition().y
 								* ppu, blockSize, blockSize);
 			}
 		}
@@ -220,24 +164,24 @@ public class WorldRenderer {
 
 	private void drawPuffle() {
 		Puffle puffle = world.getPuffle();
-		float puffleSize = (Puffle.RADIUS * 2) * ppu;
+		float puffleSize = (IPuffle.RADIUS * 2) * ppu;
 		// draw puffle to screen with rotation
 		spriteBatch.draw(puffleTexture,
-				(puffle.getPosition().x - Puffle.RADIUS) * ppu,
-				(puffle.getPosition().y - Puffle.RADIUS) * ppu, puffleSize / 2,
+				(puffle.getPosition().x - IPuffle.RADIUS) * ppu,
+				(puffle.getPosition().y - IPuffle.RADIUS) * ppu, puffleSize / 2,
 				puffleSize / 2, puffleSize, puffleSize, 1f, 1f,
 				puffle.getRotation(), true);
 	}
 
 	private void drawInventory(Inventory inventory) {
 		// store size of inventory
-		float invWidth = inventory.getBounds().width * ppu;
-		float invHeight = inventory.getBounds().height * ppu;
+		float invXSize = invBounds.width * ppu;
+		float invYSize = invBounds.height * ppu;
 
 		// store position of inventory
-		float invXPosition = (inventory.getBounds().x + cameraPosition.x) * ppu;
-		float invYPosition = ((cameraHeight - inventory.getBounds().y + cameraPosition.y) * ppu)
-				- invHeight;
+		float invXPosition = (invBounds.x + cameraPosition.x) * ppu;
+		float invYPosition = ((cameraHeight - invBounds.y + cameraPosition.y) * ppu)
+				- invYSize;
 
 		// store number of blocks in inventory as string
 		String invText = Integer.toString(inventory.getNoOfBlocks());
@@ -246,39 +190,31 @@ public class WorldRenderer {
 		float textHeight = font.getBounds(invText).height;
 
 		// store position of text in relation to inventory
-		float textXPosition = invXPosition
-				+ (inventory.getTextOffset().x * ppu);
-		float textYPosition = invYPosition + textHeight
-				+ (inventory.getTextOffset().y * ppu);
+		float textXPosition = invXPosition + (invTextPos.x * ppu);
+		float textYPosition = invYPosition + textHeight + (invTextPos.y * ppu);
 
 		// draw
 		spriteBatch.begin();
 		// inventory
-		spriteBatch.draw(blockTextures[1], invXPosition, invYPosition,
-				invWidth, invHeight);
+		spriteBatch.draw(blockTextures[1], invXPosition, invYPosition, invXSize,
+				invYSize);
+		
 		// text
 		font.draw(spriteBatch, invText, textXPosition, textYPosition);
 		spriteBatch.end();
 	}
 
 	private void drawSettings() {
-		// this needs to be changed to prevent settings being stored in main ,
-		// but for the time being i wanted to get
-		// stuff working to a usefull level
-		// sets bounds for setting button
-		Settings settings = world.getSettings();
-		float settingsWidth = settings.getButtonBounds().width * ppu;
-		float settingsHeight = settings.getButtonBounds().height * ppu;
-		float settingsButtonX = (settings.getButtonBounds().x + cameraPosition.x)
+		Rectangle settingsBounds = WorldAssetLoader.settingsBounds;
+		
+		float settingsWidth = settingsBounds.width * ppu;
+		float settingsHeight = settingsBounds.height * ppu;
+		float settingsButtonX = (settingsBounds.x + cameraPosition.x)
 				* ppu;
-		float settingsButtonY = ((cameraHeight - settings.getButtonBounds().y + cameraPosition.y) * ppu)
+		float settingsButtonY = ((cameraHeight - settingsBounds.y + cameraPosition.y) * ppu)
 				- settingsHeight;
-		// useless this will just change the box type
-		if (settings.getIfSettingsOn()) {
-			shapeRenderer.begin(ShapeType.Filled);
-		} else {
-			shapeRenderer.begin(ShapeType.Line);
-		}
+
+		shapeRenderer.begin(ShapeType.Filled);
 		// draws the setting button
 		shapeRenderer.setColor(1, 1, 0, 1);
 		shapeRenderer.rect(settingsButtonX, settingsButtonY, settingsWidth,
@@ -289,7 +225,7 @@ public class WorldRenderer {
 	private void drawEditor() {
 		// draw overlay
 		Gdx.gl.glEnable(GL20.GL_BLEND);
-		shapeRenderer.setColor(OVERLAY_COLOR);
+		shapeRenderer.setColor(EditorAssetLoader.overlayColour);
 		shapeRenderer.begin(ShapeType.Filled);
 		shapeRenderer.rect(cameraPosition.x * ppu, cameraPosition.y * ppu,
 				cameraWidth * ppu, cameraHeight * ppu);
@@ -300,13 +236,15 @@ public class WorldRenderer {
 		float gridBottom = (float) Math.ceil(cameraPosition.y);
 
 		// draw grid
-		shapeRenderer.setColor(GRID_COLOR);
+		shapeRenderer.setColor(EditorAssetLoader.gridColour);
 		shapeRenderer.begin(ShapeType.Line);
+		// vertical lines
 		for (int x = 0; x < cameraWidth; x++) {
 			shapeRenderer.line((gridLeft + x) * ppu, cameraPosition.y * ppu,
 					(gridLeft + x) * ppu, (cameraPosition.y + cameraHeight)
 							* ppu);
 		}
+		// horizontal lines
 		for (int y = 0; y < cameraHeight; y++) {
 			shapeRenderer.line(cameraPosition.x * ppu, (gridBottom + y) * ppu,
 					(cameraPosition.x + cameraWidth) * ppu, (gridBottom + y)
@@ -320,11 +258,51 @@ public class WorldRenderer {
 		// draw placeable blocks to screen
 		for (Block block : editor.getPlacedBlocks()) {
 			float blockSize = Block.SIZE * ppu;
-			spriteBatch.draw(blockTextures[block.getBlockID()],
-					block.getPosition().x * ppu, block.getPosition().y * ppu,
+			spriteBatch.draw(blockTextures[block.getBlockID().ordinal()],
+					block.getTilePosition().x * ppu, block.getTilePosition().y * ppu,
 					blockSize, blockSize);
 		}
 		spriteBatch.end();
+	}
+
+	/** Scales the size of the camera to the size of the screen */
+	public void setSize(int screenWidth, int screenHeight) {
+		// calculate number of pixels per unit
+		ppu = screenHeight / cameraHeight;
+		this.cameraWidth = screenWidth / ppu;
+
+		// update camera viewport
+		camera.viewportHeight = screenHeight;
+		camera.viewportWidth = screenWidth;
+	}
+
+	public void render() {
+		updateCameraPosition();
+
+		// clear and set background
+		Gdx.gl.glClearColor(135 / 255f, 206 / 255f, 235 / 255f, 1);
+		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+
+		// draw world
+		spriteBatch.begin();
+		drawBackground();
+		drawBlocks();
+		drawPuffle();
+		spriteBatch.end();
+
+		// draw editor
+		if (editor != null) {
+			drawEditor();
+			drawPlacedBlocks();
+		} else {
+			// draw inventory
+			Inventory inventory = world.getInventory();
+			if (!inventory.isEmpty()) {
+				drawInventory(inventory);
+			}
+		}
+		
+		//drawSettings();
 	}
 
 	// Getters ------------

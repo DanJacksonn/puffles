@@ -1,25 +1,33 @@
 package com.mygdx.puffles;
 
+import helpers.EditorAssetLoader;
+import helpers.WorldAssetLoader;
+
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Screen;
 
 import screens.EditorScreen;
 import screens.GameScreen;
 import screens.SettingsScreen;
-import entities.Settings;
-import entities.World;
+import entities.impl.World;
 
 public class Puffles extends Game {
 
 	private World world;
+	
+	// screens
 	private GameScreen gameScreen;
 	private EditorScreen editorScreen;
 	private SettingsScreen settingsScreen;
-	private Settings settings = new Settings();
 	
 	@Override
 	public void create () {
-		this.world = new World(settings);
+		// load world
+		WorldAssetLoader.Load();
+		EditorAssetLoader.Load();
+		this.world = new World();
+		
+		// load screens
 		this.gameScreen = new GameScreen(this);
 		this.editorScreen = new EditorScreen(this);
 		this.settingsScreen = new SettingsScreen(this);
@@ -29,9 +37,6 @@ public class Puffles extends Game {
 	public World getWorld() {
 		return world;
 	}
-	public Settings getSettings() {
-		return settings;
-	}
 	
 	public GameScreen getGameScreen() {
 		return gameScreen;
@@ -40,7 +45,6 @@ public class Puffles extends Game {
 	public EditorScreen getEditorScreen() {
 		return editorScreen;
 	}
-
 
 	public Screen getSettingScreen() {
 		return settingsScreen;

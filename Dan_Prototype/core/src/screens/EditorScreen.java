@@ -1,5 +1,7 @@
 package screens;
 
+import handlers.EditorHandler;
+import helpers.EditorAssetLoader;
 import renderers.WorldRenderer;
 
 import com.badlogic.gdx.Gdx;
@@ -7,15 +9,10 @@ import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.Rectangle;
 import com.mygdx.puffles.Puffles;
 
-import controllers.EditorController;
-import entities.Editor;
-import entities.Inventory;
-import entities.Settings;
-import entities.World;
+import entities.impl.Editor;
 
 public class EditorScreen implements Screen, InputProcessor {
 
@@ -31,7 +28,7 @@ public class EditorScreen implements Screen, InputProcessor {
 	private WorldRenderer renderer;
 
 	// processes inputs and character movement
-	private EditorController controller;
+	private EditorHandler handler;
 
 	public EditorScreen(Puffles game) {
 		this.game = game;
@@ -41,7 +38,7 @@ public class EditorScreen implements Screen, InputProcessor {
 	@Override
 	/** Called when this screen becomes the current screen for the game **/
 	public void show() {
-		controller = new EditorController(game.getWorld(), editor);
+		handler = new EditorHandler(game.getWorld(), editor);
 
 		// renmakes the controllersder world with editing enabled
 		renderer = new WorldRenderer(game.getWorld(), editor);
@@ -57,7 +54,7 @@ public class EditorScreen implements Screen, InputProcessor {
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
 		// update world
-		controller.update(delta);
+		handler.update(delta);
 
 		// draw world to screen
 		renderer.render();
@@ -96,7 +93,7 @@ public class EditorScreen implements Screen, InputProcessor {
 	public boolean keyDown(int keycode) {
 		// keyboard key pressed
 		if (keycode == Keys.E) {
-			controller.applyEdits();
+			handler.applyEdits();
 			// resume game
 			game.setScreen(game.getGameScreen());
 		}
@@ -122,22 +119,37 @@ public class EditorScreen implements Screen, InputProcessor {
 		float clickX = screenX / renderer.getPpu();
 		float clickY = screenY / renderer.getPpu();
 
-		if (testInventoryBounds(clickX, clickY)) {
-			// switch to editor more
-			game.setScreen(game.getEditorScreen());
-			// test for if player clicked settings button
-		} else if (testSettingsButtonBounds(clickX, clickY)) {
-
-			game.setScreen(game.getSettingScreen());
-
+		if (inDoneButtonBounds(clickX, clickY)) {
+			game.setScreen(game.getGameScreen());
 		} else {
+			// store click as position on level
 			int selectedX = (int) Math.floor(renderer.getCameraPosition().x
 					+ clickX);
 			int selectedY = (int) Math.floor(renderer.getCameraPosition().y
 					+ renderer.getCameraHeight() - clickY);
-			controller.placePressed(selectedX, selectedY);
+
+			handler.placePressed(selectedX, selectedY);
 		}
 		return true;
+	}
+
+	private boolean inDoneButtonBounds(float clickX, float clickY) {
+		// store Setting location
+		Rectangle doneButtonBounds = EditorAssetLoader.doneButtonBounds;
+		float doneButtonLocationX = doneButtonBounds.x;
+		float doneButtonLocationY = doneButtonBounds.y;
+		float doneButtonWidth = doneButtonBounds.width;
+		float doneButtonHeight = doneButtonBounds.height;
+
+		// if settings button clicked
+		if (clickX > doneButtonLocationX
+				&& clickX < (doneButtonLocationX + doneButtonWidth)
+				&& clickY > doneButtonLocationY
+				&& clickY < doneButtonLocationY + doneButtonHeight) {
+			return true;
+		} else {
+			return false;
+		}
 	}
 
 	@Override
@@ -163,46 +175,6 @@ public class EditorScreen implements Screen, InputProcessor {
 	public boolean scrolled(int amount) {
 		// TODO Auto-generated method stub
 		return false;
-	}
-
-	public boolean testInventoryBounds(float clickX, float clickY) {
-		// store inventory location
-		Inventory inventory = game.getWorld().getInventory();
-		float inventoryLocationX = inventory.getBounds().x;
-		float inventoryLocationY = inventory.getBounds().y;
-		float inventoryWidth = inventory.getBounds().width;
-		float inventoryHeight = inventory.getBounds().height;
-		// if inventory clicked
-		if (!inventory.isEmpty() && clickX > inventoryLocationX
-				&& clickX < (inventoryLocationX + inventoryWidth)
-				&& clickY > inventoryLocationY
-				&& clickY < inventoryLocationY + inventoryHeight) {
-			return true;
-		} else {
-			return false;
-		}
-
-	}
-
-	public boolean testSettingsButtonBounds(float clickX, float clickY) {
-		// store Setting location
-		Settings settings = game.getWorld().getSettings();
-		float settingsButtonLocationX = settings.getButtonBounds().x;
-		float settingsButtonLocationY = settings.getButtonBounds().y;
-		float settingsButtonWidth = settings.getButtonBounds().width;
-		float settingsButtonHeight = settings.getButtonBounds().height;
-		// if settings button clicked
-		if (clickX > settingsButtonLocationX
-				&& clickX < (settingsButtonLocationX + settingsButtonWidth)
-				&& clickY > settingsButtonLocationY
-				&& clickY < settingsButtonLocationY + settingsButtonHeight) {
-			// just used to change box fill type in the world render to allow
-			// for testing
-			settings.setIfSettingsOn(true);
-			return true;
-		} else {
-			return false;
-		}
 	}
 
 }

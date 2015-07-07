@@ -1,17 +1,17 @@
 package screens;
 
+import handlers.PuffleHandler;
+import helpers.WorldAssetLoader;
 import renderers.WorldRenderer;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.Screen;
-import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.math.Rectangle;
 import com.mygdx.puffles.Puffles;
 
-import controllers.PuffleController;
-import entities.Inventory;
-import entities.Settings;
+import entities.impl.Inventory;
 
 public class GameScreen implements Screen, InputProcessor {
 
@@ -20,21 +20,24 @@ public class GameScreen implements Screen, InputProcessor {
 	 */
 
 	private Puffles game;
+	
+	private Inventory inventory;
 
 	// processes inputs and character movement
-	private PuffleController controller;
+	private PuffleHandler handler;
 
 	// draws world to the screen
 	private WorldRenderer renderer;
 
 	public GameScreen(Puffles game) {
 		this.game = game;
+		this.inventory = game.getWorld().getInventory();
 	}
 
 	@Override
 	/** Called when this screen becomes the current screen for the game **/
 	public void show() {
-		controller = new PuffleController(game.getWorld());
+		handler = new PuffleHandler(game.getWorld());
 
 		// render world with editing disabled
 		renderer = new WorldRenderer(game.getWorld(), null);
@@ -45,12 +48,8 @@ public class GameScreen implements Screen, InputProcessor {
 
 	@Override
 	public void render(float delta) {
-		// clear and set background
-		Gdx.gl.glClearColor(135 / 255f, 206 / 255f, 235 / 255f, 1);
-		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-
 		// update world
-		controller.update(delta);
+		handler.update(delta);
 
 		// draw world to screen
 		renderer.render();
@@ -88,14 +87,14 @@ public class GameScreen implements Screen, InputProcessor {
 	@Override
 	public boolean keyDown(int keycode) {
 		// keyboard key pressed
-		if (keycode == Keys.A)
-			controller.leftPressed();
-		if (keycode == Keys.D)
-			controller.rightPressed();
-		if (keycode == Keys.W)
-			controller.jumpPressed();
+		if (keycode == Keys.A || keycode == Keys.LEFT)
+			handler.leftPressed();
+		if (keycode == Keys.D || keycode == Keys.RIGHT)
+			handler.rightPressed();
+		if (keycode == Keys.W || keycode == Keys.UP)
+			handler.jumpPressed();
 		if (keycode == Keys.E) {
-			controller.resetKeys();
+			handler.resetKeys();
 			game.setScreen(game.getEditorScreen());
 		}
 		return true;
@@ -104,12 +103,12 @@ public class GameScreen implements Screen, InputProcessor {
 	@Override
 	public boolean keyUp(int keycode) {
 		// keyboard key released
-		if (keycode == Keys.A)
-			controller.leftReleased();
-		if (keycode == Keys.D)
-			controller.rightReleased();
-		if (keycode == Keys.W)
-			controller.jumpReleased();
+		if (keycode == Keys.A || keycode == Keys.LEFT)
+			handler.leftReleased();
+		if (keycode == Keys.D || keycode == Keys.RIGHT)
+			handler.rightReleased();
+		if (keycode == Keys.W || keycode == Keys.UP)
+			handler.jumpReleased();
 		return true;
 	}
 
@@ -133,7 +132,7 @@ public class GameScreen implements Screen, InputProcessor {
 			game.setScreen(game.getSettingScreen());
 		} else {
 			// jump!
-			controller.jumpPressed();
+			handler.jumpPressed();
 		}
 		return true;
 	}
@@ -141,7 +140,7 @@ public class GameScreen implements Screen, InputProcessor {
 	@Override
 	public boolean touchUp(int screenX, int screenY, int pointer, int button) {
 		// screen not being touched- stop jumping
-		controller.jumpReleased();
+		handler.jumpReleased();
 		return false;
 	}
 
@@ -165,17 +164,13 @@ public class GameScreen implements Screen, InputProcessor {
 
 	public boolean inInventoryBounds(float clickX, float clickY) {
 		// store inventory location
-		Inventory inventory = game.getWorld().getInventory();
-		float inventoryLocationX = inventory.getBounds().x;
-		float inventoryLocationY = inventory.getBounds().y;
-		float inventoryWidth = inventory.getBounds().width;
-		float inventoryHeight = inventory.getBounds().height;
+		Rectangle invBounds = WorldAssetLoader.invBounds;
 
 		// if inventory clicked
-		if (!inventory.isEmpty() && clickX > inventoryLocationX
-				&& clickX < (inventoryLocationX + inventoryWidth)
-				&& clickY > inventoryLocationY
-				&& clickY < inventoryLocationY + inventoryHeight) {
+		if (!inventory.isEmpty() && clickX > invBounds.x
+				&& clickX < (invBounds.x + invBounds.width)
+				&& clickY > invBounds.y
+				&& clickY < invBounds.y + invBounds.height) {
 			return true;
 		} else {
 			return false;
@@ -184,20 +179,17 @@ public class GameScreen implements Screen, InputProcessor {
 
 	public boolean inSettingsButtonBounds(float clickX, float clickY) {
 		// store Setting location
-		Settings settings = game.getWorld().getSettings();
-		float settingsButtonLocationX = settings.getButtonBounds().x;
-		float settingsButtonLocationY = settings.getButtonBounds().y;
-		float settingsButtonWidth = settings.getButtonBounds().width;
-		float settingsButtonHeight = settings.getButtonBounds().height;
+		Rectangle settingsBounds = WorldAssetLoader.settingsBounds;
+		float settingsButtonLocationX = settingsBounds.x;
+		float settingsButtonLocationY = settingsBounds.y;
+		float settingsButtonWidth = settingsBounds.width;
+		float settingsButtonHeight = settingsBounds.height;
 
 		// if settings button clicked
 		if (clickX > settingsButtonLocationX
 				&& clickX < (settingsButtonLocationX + settingsButtonWidth)
 				&& clickY > settingsButtonLocationY
 				&& clickY < settingsButtonLocationY + settingsButtonHeight) {
-			// just used to change box fill type in the world render to allow
-			// for testing
-			settings.setIfSettingsOn(true);
 			return true;
 		} else {
 			return false;

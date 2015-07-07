@@ -3,7 +3,7 @@ package renderers;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 
-import entities.World;
+import entities.impl.World;
 
 public class SettingsRenderer {
 	private ShapeRenderer shapeRenderer;

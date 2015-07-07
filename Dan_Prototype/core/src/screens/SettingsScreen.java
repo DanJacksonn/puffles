@@ -9,8 +9,6 @@ import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
 import com.mygdx.puffles.Puffles;
 
-import entities.Settings;
-
 public class SettingsScreen implements Screen, InputProcessor {
 	private Puffles game;
 	public SettingsRenderer settingsRenderer;
@@ -42,11 +40,7 @@ public class SettingsScreen implements Screen, InputProcessor {
 	public boolean touchDown(int screenX, int screenY, int pointer, int button) {
 		float clickX = screenX / worldRenderer.getPpu();
 		float clickY = screenY / worldRenderer.getPpu();
-		if(testSettingsButtonBounds(clickX,clickY)){
-			
-			game.setScreen(game.getGameScreen());
-			
-		}
+		// TODO do things depending on click pos
 		return false;
 	}
 
@@ -122,24 +116,6 @@ public class SettingsScreen implements Screen, InputProcessor {
 	public void dispose() {
 		// TODO Auto-generated method stub
 		
-	}
-	public boolean testSettingsButtonBounds(float clickX,float clickY){
-		// store Setting location
-		Settings settings = game.getWorld().getSettings();
-		float settingsButtonLocationX = settings.getButtonBounds().x;
-		float settingsButtonLocationY = settings.getButtonBounds().y;
-		float settingsButtonWidth = settings.getButtonBounds().width;
-		float settingsButtonHeight = settings.getButtonBounds().height;
-		// if settings button clicked
-					if(clickX > settingsButtonLocationX
-						&& clickX < (settingsButtonLocationX + settingsButtonWidth)
-						&& clickY > settingsButtonLocationY
-						&& clickY < settingsButtonLocationY +  settingsButtonHeight) {
-						settings.setIfSettingsOn(false);
-						return true;
-					}else{
-						return false;
-					}
 	}
 
 }
