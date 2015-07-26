@@ -1,5 +1,7 @@
 package renderers;
 
+import resources.Bounds;
+import resources.GameState;
 import helpers.EditorAssetLoader;
 import helpers.WorldAssetLoader;
 
@@ -12,18 +14,17 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
-import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 
+import entities.api.IBlock;
 import entities.api.IPuffle;
 import entities.impl.Block;
 import entities.impl.Editor;
 import entities.impl.Inventory;
-import entities.impl.Level;
 import entities.impl.Puffle;
 import entities.impl.World;
 
-public class WorldRenderer {
+public class GameRenderer {
 
 	/**
 	 * This class renders the game world to the screen. Each block in the game
@@ -41,10 +42,6 @@ public class WorldRenderer {
 
 	private SpriteBatch spriteBatch;
 
-	// world objects
-	private Puffle puffle;
-	private Level level;
-
 	// world assets
 	private Texture backgroundTexture;
 	private float backgroundWidth;
@@ -52,7 +49,7 @@ public class WorldRenderer {
 	private TextureRegion[] damageTextures;
 	private TextureRegion puffleTexture;
 	BitmapFont font;
-	private Rectangle invBounds;
+	private Bounds invBounds;
 	private Vector2 invTextPos;
 
 	private float ppu; // pixels per unit
@@ -60,25 +57,19 @@ public class WorldRenderer {
 	private float cameraWidth; // units
 	private float cameraHeight; // units
 
-	public WorldRenderer(World world, Editor editor) {
+	public GameRenderer(World world, Editor editor) {
 		this.world = world;
 		this.editor = editor;
 
 		// load render tools
 		this.camera = new OrthographicCamera();
 		this.cameraHeight = CAMERA_HEIGHT;
-		this.cameraPosition = new Vector2(world.getPuffle().getPosition().x,
-				world.getPuffle().getPosition().y);
+		this.cameraPosition = new Vector2(world.puffle.getPosition().x,
+				world.puffle.getPosition().y);
 		this.shapeRenderer = new ShapeRenderer();
 		this.spriteBatch = new SpriteBatch();
 
-		loadWorldObjects();
 		loadAssets();
-	}
-
-	private void loadWorldObjects() {
-		this.puffle = world.getPuffle();
-		this.level = world.getLevel();
 	}
 
 	private void loadAssets() {
@@ -93,9 +84,36 @@ public class WorldRenderer {
 		this.invBounds = WorldAssetLoader.invBounds;
 		this.invTextPos = WorldAssetLoader.invTextPos;
 	}
+	
+	public void render(GameState state) {
+		updateCameraPosition();
+
+		// clear and set background
+		Gdx.gl.glClearColor(135 / 255f, 206 / 255f, 235 / 255f, 1);
+		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+
+		// draw world
+		spriteBatch.begin();
+		drawBackground();
+		drawBlocks();
+		drawPuffle();
+		spriteBatch.end();
+
+		// draw editor
+		if (state == GameState.EDITING) {
+			drawEditor();
+			drawPlacedBlocks();
+		} else {
+			if (!world.inventory.isEmpty()) {
+				drawInventory(world.inventory);
+			}
+		}
+		
+		//drawSettings();
+	}
 
 	public void updateCameraPosition() {
-		Vector2 pufflePosition = puffle.getPosition();
+		Vector2 pufflePosition = world.puffle.getPosition();
 
 		// keep puffle in middle of camera on x axis
 		cameraPosition.x = pufflePosition.x - (cameraWidth / 2);
@@ -104,9 +122,9 @@ public class WorldRenderer {
 		if (cameraPosition.x < 0) {
 			// snap to left of world
 			cameraPosition.x = 0;
-		} else if (cameraPosition.x + cameraWidth > level.getWidth()) {
+		} else if (cameraPosition.x + cameraWidth > world.level.getWidth()) {
 			// snap to right of world
-			cameraPosition.x = level.getWidth() - cameraWidth;
+			cameraPosition.x = world.level.getWidth() - cameraWidth;
 		}
 
 		// if puffle is near top/bottom of camera
@@ -123,9 +141,9 @@ public class WorldRenderer {
 		if (cameraPosition.y < 0) {
 			// snap to bottom of world
 			cameraPosition.y = 0;
-		} else if (cameraPosition.y + cameraHeight > level.getHeight()) {
+		} else if (cameraPosition.y + cameraHeight > world.level.getHeight()) {
 			// snap to top of world
-			cameraPosition.y = level.getHeight() - cameraHeight;
+			cameraPosition.y = world.level.getHeight() - cameraHeight;
 		}
 
 		// set camera position
@@ -149,9 +167,17 @@ public class WorldRenderer {
 				(int) CAMERA_HEIGHT)) {
 			float blockSize = Block.SIZE * ppu;
 			// draw block to screen
-			spriteBatch.draw(blockTextures[block.getBlockID().ordinal()],
-					block.getTilePosition().x * ppu, block.getTilePosition().y * ppu,
-					blockSize, blockSize);
+			IBlock.Type blockId = block.getBlockType();
+			switch (blockId) {
+			case STONE:
+			case GRASS:
+				spriteBatch.draw(blockTextures[blockId.ordinal()],
+						block.getTilePosition().x * ppu,
+						block.getTilePosition().y * ppu, blockSize, blockSize);
+				break;
+			default:
+				break;
+			}
 			// draw damage to screen
 			int damageValue = block.getDamageValue();
 			if (damageValue > 0) {
@@ -163,7 +189,7 @@ public class WorldRenderer {
 	}
 
 	private void drawPuffle() {
-		Puffle puffle = world.getPuffle();
+		Puffle puffle = world.puffle;
 		float puffleSize = (IPuffle.RADIUS * 2) * ppu;
 		// draw puffle to screen with rotation
 		spriteBatch.draw(puffleTexture,
@@ -175,12 +201,12 @@ public class WorldRenderer {
 
 	private void drawInventory(Inventory inventory) {
 		// store size of inventory
-		float invXSize = invBounds.width * ppu;
-		float invYSize = invBounds.height * ppu;
+		float invXSize = invBounds.getWidth() * ppu;
+		float invYSize = invBounds.getHeight() * ppu;
 
 		// store position of inventory
-		float invXPosition = (invBounds.x + cameraPosition.x) * ppu;
-		float invYPosition = ((cameraHeight - invBounds.y + cameraPosition.y) * ppu)
+		float invXPosition = (invBounds.left + cameraPosition.x) * ppu;
+		float invYPosition = ((cameraHeight - invBounds.bottom + cameraPosition.y) * ppu)
 				- invYSize;
 
 		// store number of blocks in inventory as string
@@ -205,13 +231,13 @@ public class WorldRenderer {
 	}
 
 	private void drawSettings() {
-		Rectangle settingsBounds = WorldAssetLoader.settingsBounds;
+		Bounds settingsBounds = WorldAssetLoader.settingsBounds;
 		
-		float settingsWidth = settingsBounds.width * ppu;
-		float settingsHeight = settingsBounds.height * ppu;
-		float settingsButtonX = (settingsBounds.x + cameraPosition.x)
+		float settingsWidth = settingsBounds.getWidth() * ppu;
+		float settingsHeight = settingsBounds.getHeight() * ppu;
+		float settingsButtonX = (settingsBounds.left + cameraPosition.x)
 				* ppu;
-		float settingsButtonY = ((cameraHeight - settingsBounds.y + cameraPosition.y) * ppu)
+		float settingsButtonY = ((cameraHeight - settingsBounds.bottom + cameraPosition.y) * ppu)
 				- settingsHeight;
 
 		shapeRenderer.begin(ShapeType.Filled);
@@ -258,7 +284,7 @@ public class WorldRenderer {
 		// draw placeable blocks to screen
 		for (Block block : editor.getPlacedBlocks()) {
 			float blockSize = Block.SIZE * ppu;
-			spriteBatch.draw(blockTextures[block.getBlockID().ordinal()],
+			spriteBatch.draw(blockTextures[block.getBlockType().ordinal()],
 					block.getTilePosition().x * ppu, block.getTilePosition().y * ppu,
 					blockSize, blockSize);
 		}
@@ -274,35 +300,6 @@ public class WorldRenderer {
 		// update camera viewport
 		camera.viewportHeight = screenHeight;
 		camera.viewportWidth = screenWidth;
-	}
-
-	public void render() {
-		updateCameraPosition();
-
-		// clear and set background
-		Gdx.gl.glClearColor(135 / 255f, 206 / 255f, 235 / 255f, 1);
-		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-
-		// draw world
-		spriteBatch.begin();
-		drawBackground();
-		drawBlocks();
-		drawPuffle();
-		spriteBatch.end();
-
-		// draw editor
-		if (editor != null) {
-			drawEditor();
-			drawPlacedBlocks();
-		} else {
-			// draw inventory
-			Inventory inventory = world.getInventory();
-			if (!inventory.isEmpty()) {
-				drawInventory(inventory);
-			}
-		}
-		
-		//drawSettings();
 	}
 
 	// Getters ------------

@@ -10,7 +10,7 @@ public class Inventory implements IInventory {
 	private int noOfBlocks;
 	
 	public Inventory() {
-		this.noOfBlocks = 0;
+		this.noOfBlocks = INITIAL_BLOCK_COUNT;
 	}
 	
 	@Override

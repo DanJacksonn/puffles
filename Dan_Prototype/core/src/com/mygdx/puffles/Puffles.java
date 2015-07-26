@@ -4,50 +4,37 @@ import helpers.EditorAssetLoader;
 import helpers.WorldAssetLoader;
 
 import com.badlogic.gdx.Game;
-import com.badlogic.gdx.Screen;
 
-import screens.EditorScreen;
 import screens.GameScreen;
-import screens.SettingsScreen;
-import entities.impl.World;
+import screens.MenuScreen;
 
 public class Puffles extends Game {
 
-	private World world;
-	
-	// screens
-	private GameScreen gameScreen;
-	private EditorScreen editorScreen;
-	private SettingsScreen settingsScreen;
+	public GameScreen gameScreen;
+	public MenuScreen menuScreen;
 	
 	@Override
 	public void create () {
-		// load world
 		WorldAssetLoader.Load();
 		EditorAssetLoader.Load();
-		this.world = new World();
-		
-		// load screens
 		this.gameScreen = new GameScreen(this);
-		this.editorScreen = new EditorScreen(this);
-		this.settingsScreen = new SettingsScreen(this);
-		setScreen(gameScreen);
+		this.menuScreen = new MenuScreen(this);
+		this.setScreen(new GameScreen(this));
 	}
 	
-	public World getWorld() {
-		return world;
+	public void render() {
+		super.render();
+	}
+	
+	public void dispose() {
 	}
 	
 	public GameScreen getGameScreen() {
 		return gameScreen;
 	}
 	
-	public EditorScreen getEditorScreen() {
-		return editorScreen;
-	}
-
-	public Screen getSettingScreen() {
-		return settingsScreen;
+	public MenuScreen getMenuScreen() {
+		return menuScreen;
 	}
 	
 

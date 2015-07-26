@@ -1,5 +1,7 @@
 package entities.impl;
 
+import resources.TilePosition;
+
 import com.badlogic.gdx.math.Circle;
 import com.badlogic.gdx.math.Vector2;
 
@@ -125,5 +127,13 @@ public class Puffle implements IPuffle {
 
 	public void setState(State newState) {
 		this.state = newState;
+	}
+
+	public boolean isAccelerating() {
+		return acceleration.x != 0;
+	}
+
+	public boolean isMoving() {
+		return velocity.x != 0;
 	}
 }

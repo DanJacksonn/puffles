@@ -1,6 +1,7 @@
 package entities.impl;
 
-import com.badlogic.gdx.math.Vector2;
+import resources.TilePosition;
+
 import com.badlogic.gdx.utils.Array;
 
 import entities.api.IEditor;

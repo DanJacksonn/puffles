@@ -1,12 +1,13 @@
 package helpers;
 
+import resources.Bounds;
+
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 
 public class WorldAssetLoader {
@@ -23,9 +24,9 @@ public class WorldAssetLoader {
 	public static BitmapFont font;
 	
 	// hud locations
-	public static Rectangle invBounds;
+	public static Bounds invBounds;
 	public static Vector2 invTextPos;
-	public static Rectangle settingsBounds;
+	public static Bounds settingsBounds;
 
 	public static void Load() {
 		atlas = new TextureAtlas(
@@ -56,9 +57,9 @@ public class WorldAssetLoader {
 		font.setColor(Color.WHITE);
 		
 		// gui positions
-		invBounds = new Rectangle(0.6f, 0.1f, 0.6f, 0.6f);
+		invBounds = new Bounds(0.6f, 0.1f, 0.6f);
 		invTextPos = new Vector2(0.08f, 0.08f);
-		settingsBounds = new Rectangle(13.8f, 0.1f, 0.6f, 0.6f);
+		settingsBounds = new Bounds(13.8f, 0.1f, 0.6f);
 	}
 
 	public static void dispose() {

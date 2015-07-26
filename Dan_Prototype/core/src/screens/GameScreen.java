@@ -1,17 +1,21 @@
 package screens;
 
+import handlers.EditorHandler;
 import handlers.PuffleHandler;
+import helpers.EditorAssetLoader;
 import helpers.WorldAssetLoader;
-import renderers.WorldRenderer;
+import renderers.GameRenderer;
+import resources.Bounds;
+import resources.GameState;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.Screen;
-import com.badlogic.gdx.math.Rectangle;
 import com.mygdx.puffles.Puffles;
 
-import entities.impl.Inventory;
+import entities.impl.Editor;
+import entities.impl.World;
 
 public class GameScreen implements Screen, InputProcessor {
 
@@ -20,44 +24,46 @@ public class GameScreen implements Screen, InputProcessor {
 	 */
 
 	private Puffles game;
+	private GameState state;
 	
-	private Inventory inventory;
+	private World world;
+	private Editor editor;
+	private PuffleHandler puffleHandler;
+	private EditorHandler editorHandler;
+	private GameRenderer renderer;
 
-	// processes inputs and character movement
-	private PuffleHandler handler;
-
-	// draws world to the screen
-	private WorldRenderer renderer;
-
-	public GameScreen(Puffles game) {
+	public GameScreen(final Puffles game) {
 		this.game = game;
-		this.inventory = game.getWorld().getInventory();
+		this.world = new World();
+		this.editor = new Editor();
+		this.state = GameState.RUNNING;
+		this.puffleHandler = new PuffleHandler(world);
+		this.editorHandler = new EditorHandler(world, editor);
+		this.renderer = new GameRenderer(world, editor);
 	}
 
 	@Override
-	/** Called when this screen becomes the current screen for the game **/
 	public void show() {
-		handler = new PuffleHandler(game.getWorld());
-
-		// render world with editing disabled
-		renderer = new WorldRenderer(game.getWorld(), null);
-
-		// set this screen as current input processor
 		Gdx.input.setInputProcessor(this);
 	}
 
 	@Override
 	public void render(float delta) {
-		// update world
-		handler.update(delta);
-
-		// draw world to screen
-		renderer.render();
+		switch (state) {
+		case RUNNING:
+			puffleHandler.update(delta);
+			break;
+		case EDITING:
+			editorHandler.update(delta);
+			break;
+		default:
+			break;
+		}
+		renderer.render(state);
 	}
 
 	@Override
 	public void resize(int width, int height) {
-		// screen size changed
 		renderer.setSize(width, height);
 	}
 
@@ -86,29 +92,71 @@ public class GameScreen implements Screen, InputProcessor {
 
 	@Override
 	public boolean keyDown(int keycode) {
-		// keyboard key pressed
-		if (keycode == Keys.A || keycode == Keys.LEFT)
-			handler.leftPressed();
-		if (keycode == Keys.D || keycode == Keys.RIGHT)
-			handler.rightPressed();
-		if (keycode == Keys.W || keycode == Keys.UP)
-			handler.jumpPressed();
-		if (keycode == Keys.E) {
-			handler.resetKeys();
-			game.setScreen(game.getEditorScreen());
+		switch (state) {
+		case RUNNING:
+			keyDownRunning(keycode);
+			break;
+		case EDITING:
+			keyDownEditing(keycode);
+			break;
+		case PAUSED:
+			break;
+		default:
+			break;
 		}
 		return true;
 	}
 
+	private void keyDownRunning(int keycode) {
+		switch (keycode) {
+		case Keys.A:
+		case Keys.LEFT:
+				puffleHandler.leftPressed();
+			break;
+		case Keys.D:
+		case Keys.RIGHT:
+				puffleHandler.rightPressed();
+			break;
+		case Keys.W:
+		case Keys.UP:
+				puffleHandler.upPressed();
+			break;
+		case Keys.E:
+			puffleHandler.resetKeys();
+			state = GameState.EDITING;
+			break;
+		}
+	}
+	
+	private void keyDownEditing(int keycode) {
+		switch(keycode) {
+		case Keys.E:
+			world.level.addBlocks(editor.getPlacedBlocks());
+			editor.clearPlacedBlocks();
+			state = GameState.RUNNING;
+			editorHandler.resetKeys();
+			break;
+		default:
+			break;
+		}
+	}
+
 	@Override
 	public boolean keyUp(int keycode) {
-		// keyboard key released
-		if (keycode == Keys.A || keycode == Keys.LEFT)
-			handler.leftReleased();
-		if (keycode == Keys.D || keycode == Keys.RIGHT)
-			handler.rightReleased();
-		if (keycode == Keys.W || keycode == Keys.UP)
-			handler.jumpReleased();
+		switch (keycode) {
+		case Keys.A:
+		case Keys.LEFT:
+				puffleHandler.upReleased();
+			break;
+		case Keys.D:
+		case Keys.RIGHT:
+				puffleHandler.rightReleased();
+			break;
+		case Keys.W:
+		case Keys.UP:
+				puffleHandler.upReleased();
+			break;
+		}
 		return true;
 	}
 
@@ -120,27 +168,68 @@ public class GameScreen implements Screen, InputProcessor {
 
 	@Override
 	public boolean touchDown(int screenX, int screenY, int pointer, int button) {
-		// store click location
-		float clickX = screenX / renderer.getPpu();
-		float clickY = screenY / renderer.getPpu();
-
-		if (inInventoryBounds(clickX, clickY)) {
-			// switch to editor more
-			game.setScreen(game.getEditorScreen());
-		} else if (inSettingsButtonBounds(clickX, clickY)) {
-			// go to settings menu screen
-			game.setScreen(game.getSettingScreen());
-		} else {
-			// jump!
-			handler.jumpPressed();
+		float ppu = renderer.getPpu();
+		float clickX = screenX / ppu;
+		float clickY = screenY / ppu;
+		switch (state) {
+		case RUNNING:
+			clickedWhilstRunning(clickX, clickY);
+			break;
+		case EDITING:
+			clickedWhilstEditing(clickX, clickY);
+			break;
+		default:
+			break;
 		}
 		return true;
 	}
 
+	private void clickedWhilstRunning(float clickX, float clickY) {
+		if (clickedOnInventoryButton(clickX, clickY)) {
+			 state = GameState.EDITING;
+		} else if (clickedOnSettingsButton(clickX, clickY)) {
+			 game.setScreen(game.getMenuScreen());
+		} else {
+			puffleHandler.upPressed();
+		}
+	}
+	
+	public boolean clickedOnInventoryButton(float clickX, float clickY) {
+		Bounds invBounds = WorldAssetLoader.invBounds;
+		return !world.inventory.isEmpty() && invBounds.isWithinBounds(clickX, clickY);
+	}
+	
+	public boolean clickedOnSettingsButton(float clickX, float clickY) {
+		Bounds settingsBounds = WorldAssetLoader.settingsBounds;
+		return settingsBounds.isWithinBounds(clickX, clickY);
+	}
+
+	private void clickedWhilstEditing(float clickX, float clickY) {
+		if (inDoneButtonBounds(clickX, clickY)) {
+			state = GameState.RUNNING;
+		} else {
+			int selectedX = (int) Math.floor(renderer.getCameraPosition().x
+					+ clickX);
+			int selectedY = (int) Math.floor(renderer.getCameraPosition().y
+					+ (renderer.getCameraHeight() - clickY));
+			editorHandler.placePressed(selectedX, selectedY);
+		}
+	}
+	
+	private boolean inDoneButtonBounds(float clickX, float clickY) {
+		Bounds doneButtonBounds = EditorAssetLoader.doneButtonBounds;
+		return doneButtonBounds.isWithinBounds(clickX, clickY);
+	}
+	
 	@Override
 	public boolean touchUp(int screenX, int screenY, int pointer, int button) {
-		// screen not being touched- stop jumping
-		handler.jumpReleased();
+		switch (state) {
+		case RUNNING:
+			puffleHandler.upReleased();
+			break;
+		default:
+			break;
+		}
 		return false;
 	}
 
@@ -161,39 +250,4 @@ public class GameScreen implements Screen, InputProcessor {
 		// TODO Auto-generated method stub
 		return false;
 	}
-
-	public boolean inInventoryBounds(float clickX, float clickY) {
-		// store inventory location
-		Rectangle invBounds = WorldAssetLoader.invBounds;
-
-		// if inventory clicked
-		if (!inventory.isEmpty() && clickX > invBounds.x
-				&& clickX < (invBounds.x + invBounds.width)
-				&& clickY > invBounds.y
-				&& clickY < invBounds.y + invBounds.height) {
-			return true;
-		} else {
-			return false;
-		}
-	}
-
-	public boolean inSettingsButtonBounds(float clickX, float clickY) {
-		// store Setting location
-		Rectangle settingsBounds = WorldAssetLoader.settingsBounds;
-		float settingsButtonLocationX = settingsBounds.x;
-		float settingsButtonLocationY = settingsBounds.y;
-		float settingsButtonWidth = settingsBounds.width;
-		float settingsButtonHeight = settingsBounds.height;
-
-		// if settings button clicked
-		if (clickX > settingsButtonLocationX
-				&& clickX < (settingsButtonLocationX + settingsButtonWidth)
-				&& clickY > settingsButtonLocationY
-				&& clickY < settingsButtonLocationY + settingsButtonHeight) {
-			return true;
-		} else {
-			return false;
-		}
-	}
-
 }

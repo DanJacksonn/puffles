@@ -1,7 +1,8 @@
 package entities.impl;
 
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.files.FileHandle;
+import resources.LevelData;
+import resources.TilePosition;
+
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 
@@ -9,73 +10,37 @@ import entities.api.IBlock;
 
 public class Level {
 
-	/**
-	 * This class represents a level. A level is an array of blocks.
-	 */
-
-	private int levelID;
 	private int width;
 	private int height;
 	private Block[][] blocks;
 
-	public Level() {
-		this.levelID = 3;
-		loadLevelText();
+	public Level(LevelData levelData) {
+		this.width = levelData.getWidth();
+		this.height = levelData.getHeight();
+		convertLevelDataToBlocks(levelData);
 	}
 
-	/** Loads a level from a file */
-	private void loadLevelText() {
-		char tileType;
-
-		// read map from file
-		FileHandle file = Gdx.files.internal(
-				"levels/lvl" + levelID+ ".map");
-		String map = file.readString();
-
-		// store width of level
-		this.width = getLevelWidth(map);
-		// store width of map (accounts for \r\n on map)
-		int mapWidth = width + 2;
-
-		// store height of level (same as map)
-		this.height = (map.length() + 2) / mapWidth;
-
-		// store level blocks
-		this.blocks = new Block[width + 1][height + 1];
-
-		// for every tile in level
+	private void convertLevelDataToBlocks(LevelData levelData) {
+		blocks = new Block[width][height];
 		for (int y = 0; y < height; y++) {
 			for (int x = 0; x < width; x++) {
-				// get tile type from map
-				tileType = map.charAt((y * mapWidth) + x);
-				// add new block of type tileType
-				blocks[x][(height - y) - 1] = 
-						toBlock(tileType, x, (height - y) - 1);
+				blocks[x][y] = createBlock(levelData.dataAt(x, y), x, y);
 			}
 		}
 	}
 
-	/** Calculates width of the level */
-	private int getLevelWidth(String gmap) {
-		char[] map = gmap.toCharArray();
-		int count = 0;
-		for (char character : map) {
-			if (character == '\r') {
-				return count;
-			}
-			count++;
-		}
-		return count;
-	}
-
-	/** Converts map character to block */
-	private Block toBlock(char c, int row, int col) {
-		TilePosition position = new TilePosition(row, col);
-		switch (c) {
+	/** Maps level data to block types */
+	private Block createBlock(char dataValue, int x, int y) {
+		TilePosition tilePosition = new TilePosition(x, y);
+		switch (dataValue) {
 		case '#':
-			return new Block(position, IBlock.Type.AIR);
+			return new Block(tilePosition, IBlock.Type.STONE);
 		case '%':
-			return new Block(position, IBlock.Type.GRASS);
+			return new Block(tilePosition, IBlock.Type.GRASS);
+		case 'S':
+			return new Block(tilePosition, IBlock.Type.SPAWN_POINT);
+		case 'G':
+			return new Block(tilePosition, IBlock.Type.GOAL);
 		default:
 			return null;
 		}
@@ -83,23 +48,21 @@ public class Level {
 
 	public void addBlocks(Array<Block> newBlocks) {
 		for (Block block : newBlocks) {
-			blocks[(int) block.getTilePosition().x][(int) block.getTilePosition().y] = block;
+			blocks[(int) Math.floor(block.getTilePosition().x)]
+				  [(int) Math.floor(block.getTilePosition().y)] 
+				   = block;
 		}
 	}
 
-	public boolean breakBlock(Vector2 position) {
-		IBlock block = blocks[(int) position.x][(int) position.y];
+	public void damageBlock(Vector2 position) {
+		Block block = blocks[(int) Math.floor(position.x)]
+							[(int) Math.floor(position.y)];
 		block.damage();
-
 		if (block.isBroken()) {
 			blocks[(int) position.x][(int) position.y] = null;
-			return true;
-		} else {
-			return false;
 		}
 	}
 
-	// Getters -----------
 	public int getWidth() {
 		return width;
 	}
@@ -116,13 +79,14 @@ public class Level {
 		return blocks[row][col];
 	}
 
-	public boolean isEmpty(Vector2 position) {
+	public boolean isPositionEmpty(Vector2 position) {
+		return blocks[(int) position.x][(int) position.y] == null;
+	}
+	
+	public boolean isBlockBroken(Vector2 position) {
 		return blocks[(int) position.x][(int) position.y] == null;
 	}
 
-	// --------------------
-
-	// Setters ------------
 	public void setWidth(int width) {
 		this.width = width;
 	}
@@ -134,6 +98,4 @@ public class Level {
 	public void setBlocks(Block[][] blocks) {
 		this.blocks = blocks;
 	}
-
-	// --------------------
 }

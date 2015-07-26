@@ -3,16 +3,14 @@ package handlers;
 import java.util.HashMap;
 import java.util.Map;
 
+import resources.TilePosition;
+
 import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.Rectangle;
 
 import entities.api.IBlock;
 import entities.impl.Block;
 import entities.impl.Editor;
-import entities.impl.Inventory;
-import entities.impl.Level;
-import entities.impl.Puffle;
-import entities.impl.TilePosition;
 import entities.impl.World;
 
 public class EditorHandler {
@@ -29,21 +27,14 @@ public class EditorHandler {
 
 	private Editor editor;
 
-	// world entities
-	private Puffle puffle;
-	private Level level;
-	private Inventory inventory;
+	private World world;
 
-	private TilePosition selectedBlock;
+	private TilePosition selectedBlockPosition;
 
 	public EditorHandler(World world, Editor editor) {
-		this.puffle = world.getPuffle();
-		this.level = world.getLevel();
-		this.inventory = world.getInventory();
-		this.selectedBlock = new TilePosition();
-
+		this.world = world;
 		this.editor = editor;
-
+		this.selectedBlockPosition = new TilePosition();
 		keys = new HashMap<EditorHandler.Inputs, Boolean>();
 		resetKeys();
 	}
@@ -56,28 +47,27 @@ public class EditorHandler {
 		processInput();
 	}
 
-	// Events ----------------
-	public void placePressed(int selectedX, int selectedY) {
-		keys.get(keys.put(Inputs.CLICK, true));
-		selectedBlock.set(selectedX, selectedY);
-	}
-	
-	// -------------------------
-
 	private boolean processInput() {
 		if (keys.get(Inputs.CLICK)) {
-			if (editor.isBlockPlacedAt(selectedBlock)) {
+			if (editor.isBlockPlacedAt(selectedBlockPosition)) {
 				// remove placed block
-				editor.unplaceBlock(selectedBlock);
-				inventory.addBlock();
+				editor.unplaceBlock(selectedBlockPosition);
+				world.addBlockToInventory();
 			} else if (placeable()) {
 				// place block
-				editor.placeBlock(new Block(selectedBlock, IBlock.Type.GRASS));
-				inventory.removeBlock();
+				TilePosition positionCopy = new TilePosition(selectedBlockPosition);
+				editor.placeBlock(new Block(positionCopy, IBlock.Type.GRASS));
+				world.removeBlockFromInventory();
 			}
 			keys.get(keys.put(Inputs.CLICK, false));
 		}
 		return false;
+	}
+	
+
+	public void placePressed(int selectedX, int selectedY) {
+		keys.get(keys.put(Inputs.CLICK, true));
+		selectedBlockPosition.set(selectedX, selectedY);
 	}
 	
 	public void applyEdits() {
@@ -85,23 +75,23 @@ public class EditorHandler {
 		resetKeys();
 		
 		// add placed blocks to the world
-		level.addBlocks(editor.getPlacedBlocks());
+		world.addBlocksToLevel(editor.getPlacedBlocks());
 		editor.clearPlacedBlocks();
 	}
 
 	/** True if block can be placed in the currently selected block */
 	private boolean placeable() {
 		// puffle in the way
-		Rectangle selectedBounds = new Rectangle(selectedBlock.x, selectedBlock.y,
+		Rectangle selectedBounds = new Rectangle(selectedBlockPosition.x, selectedBlockPosition.y,
 				Block.SIZE, Block.SIZE);
-		if (Intersector.overlaps(puffle.getBounds(), selectedBounds)) {
+		if (Intersector.overlaps(world.puffle.getBounds(), selectedBounds)) {
 			return false;
 		}
-		if (!level.isEmpty(selectedBlock)) {
+		if (!world.level.isPositionEmpty(selectedBlockPosition)) {
 			return false;
 		}
 		// no blocks in inventory
-		if (inventory.isEmpty()) {
+		if (world.inventory.isEmpty()) {
 			return false;
 		}
 		return true;

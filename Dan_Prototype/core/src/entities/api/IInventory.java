@@ -6,16 +6,19 @@ package entities.api;
 public interface IInventory {
 
 	/** Max number of blocks allowed in inventory. */
-	public static final float MAX_BLOCKS = 10;
+	static final float MAX_BLOCKS = 10;
+	
+	/** Number of blocks initially in inventory */
+	static final int INITIAL_BLOCK_COUNT = 10;
 
 	/** 
 	 * Adds a block to the inventory.
 	 * */
-	public abstract void addBlock();
+	void addBlock();
 
 	/**
 	 * Removes a block from the inventory.
 	 */
-	public abstract void removeBlock();
-
+	void removeBlock();
+	
 }

@@ -3,72 +3,129 @@ package entities.impl;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.utils.Array;
+
+import resources.Bounds;
+import resources.LevelData;
+import resources.TilePosition;
+
+/**
+ * The current state of the game entities.
+ */
 public class World {
 
-	/**
-	 * This class represents the current game world. 
-	 * Every world has a level, a player and an inventory.
-	 */
-
-	private Puffle puffle;
-	private Level level;
-	private Inventory inventory;
+	public Puffle puffle;
+	public Level level;
+	public Inventory inventory;
 	
 	public World() {
-		this.puffle = new Puffle(new TilePosition(2, 5));
-		this.level = new Level();
+		this.puffle = new Puffle(new TilePosition(2, 8));
+		LevelData levelData = new LevelData(1);
+		this.level = new Level(levelData);
 		this.inventory = new Inventory();
 	}
+	
 
-	/** Returns a list of blocks that are in the cameras window **/
+	/** 
+	 * Returns the list of blocks that are within the cameras window
+	 * 
+	 * @param cameraWidth
+	 * @param cameraHeight
+	 * @return
+	 */
 	public List<Block> getDrawableBlocks(int cameraWidth, int cameraHeight) {
+		Bounds windowBounds = findVisibleBlock(cameraWidth,
+				cameraHeight);
+		return getBlocksWithinBounds(windowBounds);
+	}
+
+	/**
+	 * Calculates which level blocks are within the cameras window. The cameras
+	 * view cannot see outside of the level and locks into place if the
+	 * puffle approaches the edges of the level.
+	 * 
+	 * @param cameraWidth
+	 *            The minimum number of blocks which can fit horizontally into
+	 *            the camera window.
+	 * @param cameraHeight
+	 *            The minimum number of blocks which can fit vertically into the
+	 *            camera window.
+	 * @return
+	 */
+	private Bounds findVisibleBlock(int cameraWidth, int cameraHeight) {
+		Bounds levelBounds = new Bounds(0, level.getWidth() - 1, 0, level.getHeight() - 1);
+		Vector2 pufflePosition = puffle.getPosition();
+		float horizontalViewDistance = calaculateViewDistanceOfPuffle(cameraWidth);
+		float verticalViewDistance = calaculateViewDistanceOfPuffle(cameraHeight);
+		float leftMostVisibleBlock = floor(pufflePosition.x - horizontalViewDistance);
+		float rightMostVisibleBlock = ceil(pufflePosition.x + horizontalViewDistance);
+		float lowestVisibleBlock = floor(pufflePosition.y - verticalViewDistance);
+		float highestVisibleBlock = ceil(pufflePosition.y + verticalViewDistance);
+		if (leftMostVisibleBlock < levelBounds.left) {
+			leftMostVisibleBlock = levelBounds.left;
+			rightMostVisibleBlock = levelBounds.left + (2 * horizontalViewDistance);
+		}
+		if (rightMostVisibleBlock > levelBounds.right) {
+			rightMostVisibleBlock = levelBounds.right;
+			leftMostVisibleBlock = levelBounds.right - (2 * horizontalViewDistance);
+		}
+		if (lowestVisibleBlock < levelBounds.bottom) {
+			lowestVisibleBlock = levelBounds.bottom;
+			highestVisibleBlock = levelBounds.bottom + (2 * verticalViewDistance);
+		}
+		if (highestVisibleBlock > levelBounds.top) {
+			highestVisibleBlock = levelBounds.top;
+			lowestVisibleBlock = levelBounds.top - (2 * verticalViewDistance);
+		}
+		return new Bounds(leftMostVisibleBlock, rightMostVisibleBlock, lowestVisibleBlock, highestVisibleBlock);
+	}
+
+	private int calaculateViewDistanceOfPuffle(int cameraWidth) {
+		return ceil(cameraWidth / 2) + 1;
+	}
+	
+	private int floor(float x) {
+		return (int) Math.floor(x);
+	}
+
+	private int ceil(float x) {
+		return (int) Math.ceil(x);
+	}
+	
+	private List<Block> getBlocksWithinBounds(Bounds bounds) {
 		List<Block> blocks = new ArrayList<Block>();
-		Block block; // temporary
-		
-		// find leftmost block
-		int x = (int) puffle.getPosition().x - cameraWidth;
-		// find lowest block
-		int y = (int) puffle.getPosition().y - cameraHeight;
-		
-		// if out of world set to edge of world
-		if (x < 0) x = 0;
-		if (y < 0) y = 0;
-
-		// find rightmost block
-		int x2 = x + 2 * cameraWidth;
-		// find highest block
-		int y2 = y + 2 * cameraHeight;
-
-		// if out of world set to edge of world
-		if (x2 > level.getWidth()) x2 = level.getWidth() - 1;
-		if (y2 > level.getHeight()) y2 = level.getHeight() - 1;
-
-		// add blocks within camera window to list
-		for (int row = x; row <= x2; row++) {
-			for (int col = y; col <= y2; col++) {
+		Block block = new Block();
+		int leftMostBlock = (int) Math.floor(bounds.left);
+		int bottomBlock = (int) Math.floor(bounds.bottom);
+		for (int row = leftMostBlock; row <= bounds.right; row++) {
+			for (int col = bottomBlock; col <= bounds.top; col++) {
 				block = level.getBlocks()[row][col];
 				if (block != null) {
 					blocks.add(block);
 				}
 			}
 		}
-		
 		return blocks;
 	}
 	
 	public void updateLevel(Level level) {
 		this.level = level;
 	}
-	
-	public Puffle getPuffle() {
-		return puffle;
-	}
-	
-	public Inventory getInventory() {
-		return inventory;
+
+	public void addBlockToInventory() {
+		inventory.addBlock();
 	}
 
-	public Level getLevel() {
-		return level;
+
+	public void removeBlockFromInventory() {
+		inventory.removeBlock();
+		
 	}
+
+
+	public void addBlocksToLevel(Array<Block> placedBlocks) {
+		level.addBlocks(placedBlocks);
+	}
+	
 }

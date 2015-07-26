@@ -1,5 +1,7 @@
 package entities.impl;
 
+import resources.TilePosition;
+
 /**
  * Abstract representation of a tile within the level.
  */

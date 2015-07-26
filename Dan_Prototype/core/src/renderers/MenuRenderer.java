@@ -5,10 +5,10 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 
 import entities.impl.World;
 
-public class SettingsRenderer {
+public class MenuRenderer {
 	private ShapeRenderer shapeRenderer;
 	
-	public SettingsRenderer(World world, Object object) {
+	public MenuRenderer(World world, Object object) {
 		// TODO Auto-generated constructor stub
 	}
 

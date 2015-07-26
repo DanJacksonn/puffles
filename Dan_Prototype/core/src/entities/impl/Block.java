@@ -1,5 +1,7 @@
 package entities.impl;
 
+import resources.TilePosition;
+
 import com.badlogic.gdx.math.Rectangle;
 
 import entities.api.IBlock;
@@ -20,6 +22,9 @@ public class Block extends Tile implements IBlock {
 		this.damageValue = INITIAL_DAMAGE;
 	}
 
+	public Block() {
+	}
+
 	@Override
 	public boolean isBreakable() {
 		return breakable;
@@ -35,17 +40,14 @@ public class Block extends Tile implements IBlock {
 		return damageValue >= BREAKING_POINT;
 	}
 
-	@Override
 	public Rectangle getBounds() {
 		return new Rectangle(position.x, position.y, SIZE, SIZE);
 	}
 
-	@Override
-	public Type getBlockID() {
+	public Type getBlockType() {
 		return blockType;
 	}
 
-	@Override
 	public int getDamageValue() {
 		return damageValue;
 	}
