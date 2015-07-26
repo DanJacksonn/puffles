@@ -146,7 +146,7 @@ public class GameScreen implements Screen, InputProcessor {
 		switch (keycode) {
 		case Keys.A:
 		case Keys.LEFT:
-				puffleHandler.upReleased();
+				puffleHandler.leftReleased();
 			break;
 		case Keys.D:
 		case Keys.RIGHT:
