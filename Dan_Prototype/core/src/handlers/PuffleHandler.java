@@ -8,7 +8,7 @@ import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 
-import entities.api.IPuffle;
+import entities.impl.Puffle;
 import entities.impl.Block;
 import entities.impl.World;
 
@@ -83,7 +83,7 @@ public class PuffleHandler {
 			if (world.puffle.isMoving()) {
 				world.puffle.scaleVelocity(FRICTION, 1);
 			} else {
-				world.puffle.setState(IPuffle.State.STOPPED);
+				world.puffle.setState(Puffle.State.STOPPED);
 			}
 		}
 		if (world.puffle.getVelocity().x > ROLL_SPEED) {
@@ -248,15 +248,15 @@ public class PuffleHandler {
 
 		if (keys.get(Keys.LEFT)) {
 			// start moving puffle left
-			world.puffle.setState(IPuffle.State.ROLLING);
+			world.puffle.setState(Puffle.State.ROLLING);
 			world.puffle.setXAcceleration(-ROLL_ACCELERATION);
 		} else if (keys.get(Keys.RIGHT)) {
 			// start moving puffle right
-			world.puffle.setState(IPuffle.State.ROLLING);
+			world.puffle.setState(Puffle.State.ROLLING);
 			world.puffle.setXAcceleration(ROLL_ACCELERATION);
 		} else {
 			// stop moving
-			world.puffle.setState(IPuffle.State.STOPPED);
+			world.puffle.setState(Puffle.State.STOPPED);
 			world.puffle.setXAcceleration(0);
 		}
 	}

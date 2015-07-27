@@ -7,6 +7,7 @@ import helpers.WorldAssetLoader;
 import renderers.GameRenderer;
 import resources.Bounds;
 import resources.GameState;
+import resources.LevelData;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;

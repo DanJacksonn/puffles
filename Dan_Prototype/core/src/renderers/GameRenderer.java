@@ -1,5 +1,6 @@
 package renderers;
 
+import resources.BlockType;
 import resources.Bounds;
 import resources.GameState;
 import helpers.EditorAssetLoader;
@@ -16,8 +17,6 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.math.Vector2;
 
-import entities.api.IBlock;
-import entities.api.IPuffle;
 import entities.impl.Block;
 import entities.impl.Editor;
 import entities.impl.Inventory;
@@ -167,7 +166,7 @@ public class GameRenderer {
 				(int) CAMERA_HEIGHT)) {
 			float blockSize = Block.SIZE * ppu;
 			// draw block to screen
-			IBlock.Type blockId = block.getBlockType();
+			BlockType blockId = block.getBlockType();
 			switch (blockId) {
 			case STONE:
 			case GRASS:
@@ -190,11 +189,11 @@ public class GameRenderer {
 
 	private void drawPuffle() {
 		Puffle puffle = world.puffle;
-		float puffleSize = (IPuffle.RADIUS * 2) * ppu;
+		float puffleSize = (Puffle.RADIUS * 2) * ppu;
 		// draw puffle to screen with rotation
 		spriteBatch.draw(puffleTexture,
-				(puffle.getPosition().x - IPuffle.RADIUS) * ppu,
-				(puffle.getPosition().y - IPuffle.RADIUS) * ppu, puffleSize / 2,
+				(puffle.getPosition().x - Puffle.RADIUS) * ppu,
+				(puffle.getPosition().y - Puffle.RADIUS) * ppu, puffleSize / 2,
 				puffleSize / 2, puffleSize, puffleSize, 1f, 1f,
 				puffle.getRotation(), true);
 	}

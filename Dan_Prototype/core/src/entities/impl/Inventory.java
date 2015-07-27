@@ -1,11 +1,15 @@
 package entities.impl;
 
-import entities.api.IInventory;
-
 /**
  * Inventory Implementation
  */
-public class Inventory implements IInventory {
+public class Inventory {
+	
+	/** Max number of blocks allowed in inventory. */
+	static final float MAX_BLOCKS = 10;
+	
+	/** Number of blocks initially in inventory */
+	static final int INITIAL_BLOCK_COUNT = 10;
 	
 	private int noOfBlocks;
 	
@@ -13,12 +17,16 @@ public class Inventory implements IInventory {
 		this.noOfBlocks = INITIAL_BLOCK_COUNT;
 	}
 	
-	@Override
+	/** 
+	 * Adds a block to the inventory.
+	 * */
 	public void addBlock() {
 		noOfBlocks += 1;
 	}
 	
-	@Override
+	/**
+	 * Removes a block from the inventory.
+	 */
 	public void removeBlock() {
 		noOfBlocks -= 1;
 	}

@@ -3,12 +3,12 @@ package handlers;
 import java.util.HashMap;
 import java.util.Map;
 
+import resources.BlockType;
 import resources.TilePosition;
 
 import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.Rectangle;
 
-import entities.api.IBlock;
 import entities.impl.Block;
 import entities.impl.Editor;
 import entities.impl.World;
@@ -56,7 +56,7 @@ public class EditorHandler {
 			} else if (placeable()) {
 				// place block
 				TilePosition positionCopy = new TilePosition(selectedBlockPosition);
-				editor.placeBlock(new Block(positionCopy, IBlock.Type.GRASS));
+				editor.placeBlock(new Block(positionCopy, BlockType.GRASS));
 				world.removeBlockFromInventory();
 			}
 			keys.get(keys.put(Inputs.CLICK, false));

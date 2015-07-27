@@ -4,12 +4,10 @@ import resources.TilePosition;
 
 import com.badlogic.gdx.utils.Array;
 
-import entities.api.IEditor;
-
 /**
  * Represents the current state of the edit screen.
  */
-public class Editor implements IEditor {
+public class Editor {
 
 	Array<Block> placedBlocks;
 	
@@ -17,12 +15,20 @@ public class Editor implements IEditor {
 		placedBlocks = new Array<Block>();
 	}
 	
-	@Override
+	/**
+	 * Places block into editor.
+	 * 
+	 * @param block Block to be placed.
+	 */
 	public void placeBlock(Block block) {
 		placedBlocks.add(block);
 	}
 	
-	@Override
+	/**
+	 * Removes block at given tile position if one exists in the editor at that position.
+	 * 
+	 * @param tilePosition Tile position within the level.
+	 */
 	public void unplaceBlock(TilePosition tilePosition) {
 		for (Block placedBlock : placedBlocks) {
 			if (placedBlock.getTilePosition().equals(tilePosition)) {
@@ -32,7 +38,9 @@ public class Editor implements IEditor {
 		}
 	}
 	
-	@Override
+	/**
+	 * Clears all blocks placed in the editor.
+	 */
 	public void clearPlacedBlocks() {
 		placedBlocks.clear();
 	}

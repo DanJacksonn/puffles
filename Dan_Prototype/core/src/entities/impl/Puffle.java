@@ -5,9 +5,39 @@ import resources.TilePosition;
 import com.badlogic.gdx.math.Circle;
 import com.badlogic.gdx.math.Vector2;
 
-import entities.api.IPuffle;
+public class Puffle {
 
-public class Puffle implements IPuffle {
+	/**
+	 *  Distance from the centre of the puffle to its outer edge. 
+	 *  */
+	public static final float RADIUS = 0.35f;
+	
+	/** Value added to the player's initial vertical spawn position so that 
+	 * it 'plops' down slightly at the start of a level.
+	 */
+	public static final float PLOP_HEIGHT = 1f;
+	
+	/** Length of time to wait after damaging a block until the puffle can
+	 * do any more damage
+	 */
+	public static final float COOLDOWN = 1f;
+
+	/** 
+	 * Starting angle of the puffle 
+	 * */
+	public static final float START_ROTATION = 90;
+	
+	/** 
+	 * Angle at which to loop back to zero degrees. 
+	 * */
+	public static final float MAX_ROTATION = 360;
+	
+	/** 
+	 * Current state of the puffle.
+	 *  */
+	public enum State {
+		STOPPED, ROLLING, DYING
+	}
 	
 	private Vector2 position;
 	private Vector2 acceleration;
@@ -26,7 +56,10 @@ public class Puffle implements IPuffle {
 		this.jumping = false;
 	}
 
-	@Override
+	/**
+	 * Update position of the puffle.
+	 * @param delta Time interval between frames.
+	 */
 	public void update(float delta) {
 		applyVelocity(delta);
 		rotatePuffle();
@@ -47,27 +80,47 @@ public class Puffle implements IPuffle {
 		}
 	}
 
-	@Override
+	/**
+	 * Add given acceleration values to the puffles acceleration values
+	 * (this can increase or decrease the total acceleration in either direction).
+	 * 
+	 * @param accelerationX Acceleration in the x direction.
+	 * @param accerlationY Acceleration in the y direction.
+	 */
 	public void applyAccleration(float accelerationX, float accerlationY) {
 		velocity.add(accelerationX, accerlationY);
 	}
 
-	@Override
+	/** 
+	 * Multiplies puffle velocity by a scalar.
+	 * 
+	 * @param scale The scalar.
+	 */
 	public void scaleVelocity(float scale) {
 		velocity.scl(scale);
 	}
 
-	@Override
+	/** 
+	 * Multiplies puffle velocity by a scalar.
+	 * 
+	 * @param x The x scalar.
+	 * @param y The y scalar.
+	 */
 	public void scaleVelocity(float scaleX, float scaleY) {
 		velocity.scl(scaleX, scaleY);
 	}
 
-	@Override
+	/**
+	 * Flip puffles x velocity.
+	 */
 	public void changeDirection() {
 		velocity.x *= -1;
 	}
 
-	@Override
+	/**
+	 * Multiplies puffle acceleration by a scalar.
+	 * @param scale The scalar.
+	 */
 	public void scaleAccleration(float scale) {
 		acceleration.scl(scale);
 	}

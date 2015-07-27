@@ -1,27 +1,28 @@
 package entities.impl;
 
+import resources.BlockType;
 import resources.LevelData;
 import resources.TilePosition;
 
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 
-import entities.api.IBlock;
-
 public class Level {
 
 	private int width;
 	private int height;
 	private Block[][] blocks;
+	private TilePosition spawnPoint;
 
-	public Level(LevelData levelData) {
+	public Level() {
+		LevelData levelData = new LevelData(1);
 		this.width = levelData.getWidth();
 		this.height = levelData.getHeight();
+		this.blocks = new Block[width][height];
 		convertLevelDataToBlocks(levelData);
 	}
 
 	private void convertLevelDataToBlocks(LevelData levelData) {
-		blocks = new Block[width][height];
 		for (int y = 0; y < height; y++) {
 			for (int x = 0; x < width; x++) {
 				blocks[x][y] = createBlock(levelData.dataAt(x, y), x, y);
@@ -34,13 +35,14 @@ public class Level {
 		TilePosition tilePosition = new TilePosition(x, y);
 		switch (dataValue) {
 		case '#':
-			return new Block(tilePosition, IBlock.Type.STONE);
+			return new Block(tilePosition, BlockType.STONE);
 		case '%':
-			return new Block(tilePosition, IBlock.Type.GRASS);
+			return new Block(tilePosition, BlockType.GRASS);
 		case 'S':
-			return new Block(tilePosition, IBlock.Type.SPAWN_POINT);
+			this.spawnPoint = tilePosition;
+			return null;
 		case 'G':
-			return new Block(tilePosition, IBlock.Type.GOAL);
+			return new Block(tilePosition, BlockType.GOAL);
 		default:
 			return null;
 		}
@@ -97,5 +99,9 @@ public class Level {
 
 	public void setBlocks(Block[][] blocks) {
 		this.blocks = blocks;
+	}
+
+	public TilePosition getSpawnPoint() {
+		return spawnPoint;
 	}
 }
