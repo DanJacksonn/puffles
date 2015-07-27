@@ -14,8 +14,8 @@ public class Level {
 	private Block[][] blocks;
 	private TilePosition spawnPoint;
 
-	public Level() {
-		LevelData levelData = new LevelData(1);
+	public Level(int levelNumber) {
+		LevelData levelData = new LevelData(levelNumber);
 		this.width = levelData.getWidth();
 		this.height = levelData.getHeight();
 		this.blocks = new Block[width][height];

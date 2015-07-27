@@ -9,7 +9,7 @@ public class Inventory {
 	static final float MAX_BLOCKS = 10;
 	
 	/** Number of blocks initially in inventory */
-	static final int INITIAL_BLOCK_COUNT = 10;
+	static final int INITIAL_BLOCK_COUNT = 0;
 	
 	private int noOfBlocks;
 	

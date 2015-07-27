@@ -20,7 +20,7 @@ public class World {
 	public Inventory inventory;
 	
 	public World() {
-		this.level = new Level();
+		this.level = new Level(3);
 		TilePosition puffleSpawn = level.getSpawnPoint();
 		this.puffle = new Puffle(puffleSpawn);
 		this.inventory = new Inventory();
