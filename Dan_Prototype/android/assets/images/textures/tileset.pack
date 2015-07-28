@@ -45,3 +45,10 @@ player
   orig: 33, 33
   offset: 0, 0
   index: -1
+ice
+  rotate: false
+  xy: 1, 43
+  size: 40, 40
+  orig: 40, 40
+  offset: 0, 0
+  index: -1

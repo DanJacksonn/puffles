@@ -10,9 +10,9 @@ import java.util.Map;
 
 import entities.impl.Block;
 import entities.impl.Puffle;
-
 import resources.BlockType;
-
+import resources.Bounds;
+import resources.TileBounds;
 import entities.impl.World;
 
 /**
@@ -100,45 +100,42 @@ public class PuffleHandler {
 	}
 
 	private void checkCollisionWithBlocks(float delta) {
-		Circle puffleCircle;
-		int x1, x2, y1, y2;
-
+		TileBounds tileBoundsOfPuffle = new TileBounds();
 		// scale velocity to time frame units
 		world.puffle.scaleVelocity(delta);
 
-		// set rectangle to puffle's bounding box
-		puffleCircle = circlePool.obtain();
-		puffleCircle.set(world.puffle.getBounds().x, world.puffle.getBounds().y,
+		// set circle to puffle's bounding box
+		Circle puffleBounds = circlePool.obtain();
+		puffleBounds.set(world.puffle.getBounds().x, world.puffle.getBounds().y,
 				world.puffle.getBounds().radius);
 
 		// store y area inhabited by puffle
-		y1 = (int) (world.puffle.getBounds().y - world.puffle.getBounds().radius);
-		y2 = (int) (world.puffle.getBounds().y + world.puffle.getBounds().radius);
-
+		tileBoundsOfPuffle.bottom = (int) Math.floor(puffleBounds.y  + 0 - puffleBounds.radius);
+		tileBoundsOfPuffle.top = (int) Math.floor(puffleBounds.y + 0 + puffleBounds.radius);
+		
 		if (world.puffle.getVelocity().x < 0) {
-			// store position after moving left
-			x1 = x2 = (int) Math.floor(world.puffle.getBounds().x
-					- world.puffle.getBounds().radius + world.puffle.getVelocity().x);
-
+			tileBoundsOfPuffle.left = tileBoundsOfPuffle.right = (int) Math
+					.floor(puffleBounds.x
+							+ world.puffle.getVelocity().x
+							- world.puffle.getBounds().radius);
 		} else {
-			// store position after moving right
-			x1 = x2 = (int) Math.floor(world.puffle.getBounds().x
-					+ world.puffle.getBounds().radius + world.puffle.getVelocity().x);
-
+			tileBoundsOfPuffle.left = tileBoundsOfPuffle.right = (int) Math
+					.floor(puffleBounds.x
+							+ world.puffle.getVelocity().x
+							+ world.puffle.getBounds().radius);
 		}
 
 		// store all blocks the puffle can collide with
-		findCollidableBlocks(x1, y1, x2, y2);
+		findCollidableBlocks(tileBoundsOfPuffle);
         //handles collitions with blocks below the player
-        checkUnderfootCollision(x1, y1, x2);
+        checkUnderFootCollision(tileBoundsOfPuffle);
 		// simulate horizontal movement
-		puffleCircle.x += world.puffle.getVelocity().x;
+		puffleBounds.x += world.puffle.getVelocity().x;
 
 		// if puffle collides then change direction
 		for (Block block : collidableBlocks) {
-
 			if (block != null
-					&& Intersector.overlaps(puffleCircle, block.getBounds())) {
+					&& Intersector.overlaps(puffleBounds, block.getBounds())) {
 
 				if (damageCooldown == 0 && block.isBreakable()) {
 					// returns true if block is broken completely
@@ -155,33 +152,33 @@ public class PuffleHandler {
 		}
 
 		// reset x position of puffle's bounding box
-		puffleCircle.x = world.puffle.getPosition().x;
+		puffleBounds.x = world.puffle.getPosition().x;
 
 		// store x position
-		x1 = (int) (world.puffle.getBounds().x - world.puffle.getBounds().radius);
-		x2 = (int) (world.puffle.getBounds().x + world.puffle.getBounds().radius);
+		tileBoundsOfPuffle.left = (int) Math.floor(world.puffle.getBounds().x - world.puffle.getBounds().radius);
+		tileBoundsOfPuffle.right = (int) Math.floor(world.puffle.getBounds().x + world.puffle.getBounds().radius);
 
 		if (world.puffle.getVelocity().y < 0) {
 			// store position after moving down
-			y1 = y2 = (int) Math.floor(world.puffle.getBounds().y
+			tileBoundsOfPuffle.bottom = tileBoundsOfPuffle.top = (int) Math.floor(world.puffle.getBounds().y
 					- world.puffle.getBounds().radius + world.puffle.getVelocity().y);
 
 		} else {
 			// store position after moving up
-			y1 = y2 = (int) Math.floor(world.puffle.getBounds().y
+			tileBoundsOfPuffle.bottom = tileBoundsOfPuffle.top = (int) Math.floor(world.puffle.getBounds().y
 					+ world.puffle.getBounds().radius + world.puffle.getVelocity().y);
 		}
 
 		// store all blocks the puffle can collide with
-		findCollidableBlocks(x1, y1, x2, y2);
+		findCollidableBlocks(tileBoundsOfPuffle);
 
 		// simulate vertical movement
-		puffleCircle.y += world.puffle.getVelocity().y;
+		puffleBounds.y += world.puffle.getVelocity().y;
 
 		// if puffle collides stop vertical movement
 		for (Block block : collidableBlocks) {
 			if (block != null
-					&& Intersector.overlaps(puffleCircle, block.getBounds())) {
+					&& Intersector.overlaps(puffleBounds, block.getBounds())) {
 				if (world.puffle.getVelocity().y < 0) {
 					grounded = true;
 				} else if (world.puffle.getVelocity().y > 0) {
@@ -204,11 +201,10 @@ public class PuffleHandler {
 	}
 
 	/** Stores all blocks found in enclosing coordinates **/
-	private void findCollidableBlocks(int x1, int y1, int x2, int y2) {
+	private void findCollidableBlocks(TileBounds bounds) {
         collidableBlocks.clear();
-
-        for (int x = x1; x <= x2; x++) {
-            for (int y = y1; y <= y2; y++) {
+        for (int x = bounds.left; x <= bounds.right; x++) {
+            for (int y = bounds.bottom; y <= bounds.top; y++) {
                 // if not outside of world
                 if (x >= 0 && x < world.level.getWidth() && y >= 0
                         && y < world.level.getHeight()) {
@@ -217,35 +213,34 @@ public class PuffleHandler {
             }
         }
     }
-    private void findUnderfootBlocks(int x1, int y1, int x2) {
+	
+	private void checkUnderFootCollision(TileBounds bounds) {
+		// finds block under player
+		findUnderfootBlocks(bounds);
+		// increases speed when player is on a ice block
+		for (Block block : walkedOnBlocks) {
+			if (block != null && block.getBlockType().equals(BlockType.ICE)) {
+				ROLL_SPEED = 8f;
+			} else {
+				// when not on ice speed is reduced
+				if (ROLL_SPEED > NORMAL_ROLL_SPEED) {
+					ROLL_SPEED -= 0.1f;
+				}
+
+			}
+		}
+	}
+    
+    private void findUnderfootBlocks(TileBounds bounds) {
         walkedOnBlocks.clear();
-        for (int x = x1; x <= x2; x++) {
+        for (int x = bounds.left; x <= bounds.right; x++) {
                 // if not outside of world
                 if (x >= 0 && x < world.level.getWidth()) {
-                    walkedOnBlocks.add(world.level.getBlock(x, y1-1));
+                    walkedOnBlocks.add(world.level.getBlock(x, bounds.bottom - 1));
                 }
 
         }
 	}
-    private void checkUnderfootCollision(int x1, int y1, int x2){
-        //finds block under player
-        findUnderfootBlocks(x1, y1, x2);
-        //increases speed when player is on a ice block
-        for (Block block : walkedOnBlocks) {
-            if (block != null  && block.getBlockType().equals(BlockType.ICE) ){
-
-                ROLL_SPEED = 8f;
-                System.out.println(block.getBlockType());
-            }else{
-        //when not on ice speed is reduced
-                if(ROLL_SPEED > NORMAL_ROLL_SPEED){
-                    ROLL_SPEED -= 0.1f;
-                }
-
-
-            }
-        }
-    }
 
 	// Events ----------------
 	public void leftPressed() {
