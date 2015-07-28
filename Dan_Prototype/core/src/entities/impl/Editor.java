@@ -1,8 +1,8 @@
 package entities.impl;
 
-import resources.TilePosition;
-
 import com.badlogic.gdx.utils.Array;
+
+import resources.TilePosition;
 
 /**
  * Represents the current state of the edit screen.

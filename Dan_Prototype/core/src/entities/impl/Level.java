@@ -1,11 +1,11 @@
 package entities.impl;
 
+import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.utils.Array;
+
 import resources.BlockType;
 import resources.LevelData;
 import resources.TilePosition;
-
-import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.utils.Array;
 
 public class Level {
 
@@ -38,6 +38,8 @@ public class Level {
 			return new Block(tilePosition, BlockType.STONE);
 		case '%':
 			return new Block(tilePosition, BlockType.GRASS);
+        case '/':
+            return new Block(tilePosition, BlockType.ICE);
 		case 'S':
 			this.spawnPoint = tilePosition;
 			return null;

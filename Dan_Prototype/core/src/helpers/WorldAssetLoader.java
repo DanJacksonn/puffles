@@ -1,7 +1,5 @@
 package helpers;
 
-import resources.Bounds;
-
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
@@ -9,6 +7,8 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
+
+import resources.Bounds;
 
 public class WorldAssetLoader {
 
@@ -31,7 +31,7 @@ public class WorldAssetLoader {
 	public static void Load() {
 		atlas = new TextureAtlas(
 				Gdx.files.internal("images/textures/tileset.pack"));
-		blockTextures = new TextureRegion[2];
+		blockTextures = new TextureRegion[5];
 		damageTextures = new TextureRegion[2];
 
 		// load background
@@ -44,6 +44,7 @@ public class WorldAssetLoader {
 		// load blocks
 		blockTextures[0] = atlas.findRegion("stone");
 		blockTextures[1] = atlas.findRegion("grass");
+        blockTextures[4] = atlas.findRegion("ice");
 
 		// load cracks
 		for (int i = 0; i < damageTextures.length; i++) {

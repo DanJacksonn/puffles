@@ -1,17 +1,16 @@
 package handlers;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import resources.BlockType;
-import resources.TilePosition;
-
 import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.Rectangle;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import entities.impl.Block;
 import entities.impl.Editor;
 import entities.impl.World;
+import resources.BlockType;
+import resources.TilePosition;
 
 public class EditorHandler {
 
@@ -35,7 +34,7 @@ public class EditorHandler {
 		this.world = world;
 		this.editor = editor;
 		this.selectedBlockPosition = new TilePosition();
-		keys = new HashMap<EditorHandler.Inputs, Boolean>();
+		keys = new HashMap<Inputs, Boolean>();
 		resetKeys();
 	}
 

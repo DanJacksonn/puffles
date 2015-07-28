@@ -1,9 +1,9 @@
 package entities.impl;
 
+import com.badlogic.gdx.math.Rectangle;
+
 import resources.BlockType;
 import resources.TilePosition;
-
-import com.badlogic.gdx.math.Rectangle;
 
 /**
  * Represents a single block within the world tiles.

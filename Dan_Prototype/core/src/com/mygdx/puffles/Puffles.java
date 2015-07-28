@@ -1,10 +1,9 @@
 package com.mygdx.puffles;
 
-import helpers.EditorAssetLoader;
-import helpers.WorldAssetLoader;
-
 import com.badlogic.gdx.Game;
 
+import helpers.EditorAssetLoader;
+import helpers.WorldAssetLoader;
 import screens.GameScreen;
 import screens.MenuScreen;
 

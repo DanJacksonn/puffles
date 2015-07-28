@@ -1,5 +1,5 @@
 package resources;
 
 public enum BlockType {
-	STONE, GRASS, AIR, GOAL
+	STONE, GRASS, AIR, GOAL,ICE
 }

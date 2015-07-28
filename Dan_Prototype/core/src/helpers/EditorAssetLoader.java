@@ -1,10 +1,9 @@
 package helpers;
 
-import resources.Bounds;
-
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
+
+import resources.Bounds;
 
 public class EditorAssetLoader {
 

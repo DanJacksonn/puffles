@@ -1,7 +1,5 @@
 package resources;
 
-import helpers.WorldAssetLoader;
-
 public class Bounds {
 	
 	public float left;

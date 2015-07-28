@@ -1,11 +1,5 @@
 package renderers;
 
-import resources.BlockType;
-import resources.Bounds;
-import resources.GameState;
-import helpers.EditorAssetLoader;
-import helpers.WorldAssetLoader;
-
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
@@ -22,6 +16,11 @@ import entities.impl.Editor;
 import entities.impl.Inventory;
 import entities.impl.Puffle;
 import entities.impl.World;
+import helpers.EditorAssetLoader;
+import helpers.WorldAssetLoader;
+import resources.BlockType;
+import resources.Bounds;
+import resources.GameState;
 
 public class GameRenderer {
 
@@ -169,10 +168,13 @@ public class GameRenderer {
 			BlockType blockId = block.getBlockType();
 			switch (blockId) {
 			case STONE:
+            case ICE:
 			case GRASS:
 				spriteBatch.draw(blockTextures[blockId.ordinal()],
+
 						block.getTilePosition().x * ppu,
 						block.getTilePosition().y * ppu, blockSize, blockSize);
+
 				break;
 			default:
 				break;

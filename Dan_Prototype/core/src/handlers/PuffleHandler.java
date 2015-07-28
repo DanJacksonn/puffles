@@ -1,15 +1,18 @@
 package handlers;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import com.badlogic.gdx.math.Circle;
 import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 
-import entities.impl.Puffle;
+import java.util.HashMap;
+import java.util.Map;
+
 import entities.impl.Block;
+import entities.impl.Puffle;
+
+import resources.BlockType;
+
 import entities.impl.World;
 
 /**
@@ -20,10 +23,10 @@ public class PuffleHandler {
 	enum Keys {
 		LEFT, RIGHT, JUMP
 	}
-	static Map<Keys, Boolean> keys = new HashMap<PuffleHandler.Keys, Boolean>();
-
+	static Map<Keys, Boolean> keys = new HashMap<Keys, Boolean>();
+    private static  float ROLL_SPEED = 2.7f;
+    private static final float NORMAL_ROLL_SPEED = 2.7f;
 	private static final float ROLL_ACCELERATION = 15f;
-	private static final float ROLL_SPEED = 2.7f;
 	private static final float FRICTION = 0.9f;
 	private static final float GRAVITY = -29f;
 	private static final float JUMP_SPEED = 9f;
@@ -39,12 +42,14 @@ public class PuffleHandler {
 	
 	private World world;
 	private Array<Block> collidableBlocks;
+    private Array<Block> walkedOnBlocks;
 	private boolean grounded;
 	private int damageCooldown;
 
 	public PuffleHandler(World world) {
 		this.world = world;
 		collidableBlocks = new Array<Block>();
+        walkedOnBlocks = new Array<Block>();
 		this.grounded = true;
 		this.damageCooldown = 0;
 		resetKeys();
@@ -72,6 +77,7 @@ public class PuffleHandler {
 		world.puffle.applyAccleration(world.puffle.getAcceleration().x,
 				world.puffle.getAcceleration().y);
 		checkCollisionWithBlocks(delta);
+
 		updateVelocity();
 
 		// update puffle's position
@@ -123,16 +129,20 @@ public class PuffleHandler {
 
 		// store all blocks the puffle can collide with
 		findCollidableBlocks(x1, y1, x2, y2);
-
+        //handles collitions with blocks below the player
+        checkUnderfootCollision(x1, y1, x2);
 		// simulate horizontal movement
 		puffleCircle.x += world.puffle.getVelocity().x;
 
 		// if puffle collides then change direction
 		for (Block block : collidableBlocks) {
+
 			if (block != null
 					&& Intersector.overlaps(puffleCircle, block.getBounds())) {
+
 				if (damageCooldown == 0 && block.isBreakable()) {
 					// returns true if block is broken completely
+
 					world.level.damageBlock(block.getTilePosition());
 					if (world.level.isBlockBroken(block.getTilePosition())) {
 						world.inventory.addBlock();
@@ -195,18 +205,47 @@ public class PuffleHandler {
 
 	/** Stores all blocks found in enclosing coordinates **/
 	private void findCollidableBlocks(int x1, int y1, int x2, int y2) {
-		collidableBlocks.clear();
+        collidableBlocks.clear();
 
-		for (int x = x1; x <= x2; x++) {
-			for (int y = y1; y <= y2; y++) {
-				// if not outside of world
-				if (x >= 0 && x < world.level.getWidth() && y >= 0
-						&& y < world.level.getHeight()) {
-					collidableBlocks.add(world.level.getBlock(x, y));
-				}
-			}
-		}
+        for (int x = x1; x <= x2; x++) {
+            for (int y = y1; y <= y2; y++) {
+                // if not outside of world
+                if (x >= 0 && x < world.level.getWidth() && y >= 0
+                        && y < world.level.getHeight()) {
+                    collidableBlocks.add(world.level.getBlock(x, y));
+                }
+            }
+        }
+    }
+    private void findUnderfootBlocks(int x1, int y1, int x2) {
+        walkedOnBlocks.clear();
+        for (int x = x1; x <= x2; x++) {
+                // if not outside of world
+                if (x >= 0 && x < world.level.getWidth()) {
+                    walkedOnBlocks.add(world.level.getBlock(x, y1-1));
+                }
+
+        }
 	}
+    private void checkUnderfootCollision(int x1, int y1, int x2){
+        //finds block under player
+        findUnderfootBlocks(x1, y1, x2);
+        //increases speed when player is on a ice block
+        for (Block block : walkedOnBlocks) {
+            if (block != null  && block.getBlockType().equals(BlockType.ICE) ){
+
+                ROLL_SPEED = 8f;
+                System.out.println(block.getBlockType());
+            }else{
+        //when not on ice speed is reduced
+                if(ROLL_SPEED > NORMAL_ROLL_SPEED){
+                    ROLL_SPEED -= 0.1f;
+                }
+
+
+            }
+        }
+    }
 
 	// Events ----------------
 	public void leftPressed() {

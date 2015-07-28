@@ -1,13 +1,12 @@
 package entities.impl;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import resources.Bounds;
-import resources.LevelData;
 import resources.TilePosition;
 
 /**
@@ -20,7 +19,7 @@ public class World {
 	public Inventory inventory;
 	
 	public World() {
-		this.level = new Level(3);
+		this.level = new Level(5);
 		TilePosition puffleSpawn = level.getSpawnPoint();
 		this.puffle = new Puffle(puffleSpawn);
 		this.inventory = new Inventory();

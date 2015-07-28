@@ -1,14 +1,5 @@
 package screens;
 
-import handlers.EditorHandler;
-import handlers.PuffleHandler;
-import helpers.EditorAssetLoader;
-import helpers.WorldAssetLoader;
-import renderers.GameRenderer;
-import resources.Bounds;
-import resources.GameState;
-import resources.LevelData;
-
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.InputProcessor;
@@ -17,6 +8,13 @@ import com.mygdx.puffles.Puffles;
 
 import entities.impl.Editor;
 import entities.impl.World;
+import handlers.EditorHandler;
+import handlers.PuffleHandler;
+import helpers.EditorAssetLoader;
+import helpers.WorldAssetLoader;
+import renderers.GameRenderer;
+import resources.Bounds;
+import resources.GameState;
 
 public class GameScreen implements Screen, InputProcessor {
 
