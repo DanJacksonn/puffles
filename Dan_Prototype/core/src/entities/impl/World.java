@@ -9,7 +9,7 @@ import java.util.List;
 import resources.Bounds;
 
 /**
- * The current state of the game entities.
+ * The current state of all game entities.
  */
 public class World {
 
@@ -23,7 +23,6 @@ public class World {
 		this.inventory = new Inventory();
 	}
 	
-
 	/** 
 	 * Returns the list of blocks that are within the cameras window
 	 * 
@@ -122,9 +121,7 @@ public class World {
 		
 	}
 
-
 	public void addBlocksToLevel(Array<Block> placedBlocks) {
 		level.addBlocks(placedBlocks);
-	}
-	
+	}	
 }
