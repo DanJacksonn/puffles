@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import resources.Bounds;
-import resources.TilePosition;
 
 /**
  * The current state of the game entities.
@@ -20,8 +19,7 @@ public class World {
 	
 	public World() {
 		this.level = new Level(5);
-		TilePosition puffleSpawn = level.getSpawnPoint();
-		this.puffle = new Puffle(puffleSpawn);
+		this.puffle = new Puffle(level.getSpawnPoint());
 		this.inventory = new Inventory();
 	}
 	
@@ -92,6 +90,12 @@ public class World {
 		return (int) Math.ceil(x);
 	}
 	
+	/** 
+	 * Returns all blocks on the level which are inside of the given bounds.
+	 * 
+	 * @param bounds The area of the level from which to get the blocks
+	 * @return
+	 */
 	private List<Block> getBlocksWithinBounds(Bounds bounds) {
 		List<Block> blocks = new ArrayList<Block>();
 		Block block = new Block();
@@ -106,10 +110,6 @@ public class World {
 			}
 		}
 		return blocks;
-	}
-	
-	public void updateLevel(Level level) {
-		this.level = level;
 	}
 
 	public void addBlockToInventory() {
