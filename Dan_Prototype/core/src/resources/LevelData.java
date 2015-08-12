@@ -8,9 +8,9 @@ import com.badlogic.gdx.files.FileHandle;
  */
 public class LevelData {
 
+	private static final int NEWLINE_CHARACTER_LENGTH = 1;
 	private static final char LINE_FEED = '\n';
 	private static final char CARRIAGE_RETURN = '\r';
-	private static final int NEWLINE_LENGTH_IN_CHARACTERS = 2;
 	private static final String FILE_TYPE = ".map";
 	private static final String FILE_LOCATION = "levels/lvl";
 	
@@ -25,7 +25,8 @@ public class LevelData {
 		this.data = new char[width][height];
 		for (int j = 0; j < height; j++) {
 			for (int i = 0; i < width; i++) {
-				data[i][height - j - 1] = fileData[i + ( j * (width + 1))];
+				data[i][height - j - 1] = 
+						fileData[i + (j * (width + NEWLINE_CHARACTER_LENGTH))];
 			}
 		}
 	}
@@ -53,7 +54,7 @@ public class LevelData {
 	}
 	
 	private int calculateLevelHeight(char[] fileData) {
-		return fileData.length / (width + NEWLINE_LENGTH_IN_CHARACTERS);
+		return fileData.length / (width + NEWLINE_CHARACTER_LENGTH);
 	}
 	
 	public int getWidth() {
