@@ -25,14 +25,20 @@ public class LevelData {
 		this.data = new char[width][height];
 		for (int j = 0; j < height; j++) {
 			for (int i = 0; i < width; i++) {
-				data[i][height - j - 1] = fileData[i + ( j * (width + 2))];
+				data[i][height - j - 1] = fileData[i + ( j * (width + 1))];
 			}
 		}
 	}
 	
 	private char[] readDataFromFile(int levelNumber) {
 		FileHandle file = Gdx.files.internal(FILE_LOCATION + levelNumber + FILE_TYPE);
-		return file.readString().toCharArray();
+		String fixedFile = fixMap(file.readString());
+		return fixedFile.toCharArray();
+	}
+	
+	private String fixMap(String file){
+		file = file.replace("\r", "");
+		return file;
 	}
 	
 	private int calculateLevelWidth(char[] fileData) {
