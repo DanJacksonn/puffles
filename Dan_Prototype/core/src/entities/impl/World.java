@@ -18,7 +18,7 @@ public class World {
 	public Inventory inventory;
 	
 	public World() {
-		this.level = new Level(5);
+		this.level = new Level(6);
 		this.puffle = new Puffle(level.getSpawnPoint());
 		this.inventory = new Inventory();
 	}

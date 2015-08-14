@@ -7,6 +7,11 @@ import com.mygdx.puffles.Puffles;
 public class DesktopLauncher {
 	public static void main (String[] arg) {
 		LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
+		config.width = 1280;
+		config.height = 720;
+		config.resizable = false;
+		config.samples = 8;
+		config.title = "Puffles";
 		new LwjglApplication(new Puffles(), config);
 	}
 }

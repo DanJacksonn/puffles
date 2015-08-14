@@ -18,7 +18,7 @@ public class Puffles extends Game {
 		EditorAssetLoader.Load();
 		this.gameScreen = new GameScreen(this);
 		this.menuScreen = new MenuScreen(this);
-		this.setScreen(new GameScreen(this));
+		this.setScreen(gameScreen);
 	}
 	
 	public void render() {

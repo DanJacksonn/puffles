@@ -24,8 +24,11 @@ public class PuffleHandler {
 		LEFT, RIGHT, JUMP
 	}
 	static Map<Keys, Boolean> keys = new HashMap<Keys, Boolean>();
-    private static  float ROLL_SPEED = 2.7f;
-    private static final float NORMAL_ROLL_SPEED = 2.7f;
+    
+    private static final float ROLL_SPEED = 2.7f;
+    private static final float DEFAULT_SPEED_MULTIPLIER = 1.0f;
+    private float speedMultiplier = DEFAULT_SPEED_MULTIPLIER;
+    
 	private static final float ROLL_ACCELERATION = 15f;
 	private static final float FRICTION = 0.9f;
 	private static final float GRAVITY = -29f;
@@ -92,10 +95,10 @@ public class PuffleHandler {
 				world.puffle.setState(Puffle.State.STOPPED);
 			}
 		}
-		if (world.puffle.getVelocity().x > ROLL_SPEED) {
-			world.puffle.setXVelocity(ROLL_SPEED);
-		} else if (world.puffle.getVelocity().x < -ROLL_SPEED) {
-			world.puffle.setXVelocity(-ROLL_SPEED);
+		if (world.puffle.getVelocity().x > ROLL_SPEED * speedMultiplier) {
+			world.puffle.setXVelocity(ROLL_SPEED * speedMultiplier);
+		} else if (world.puffle.getVelocity().x < -(ROLL_SPEED * speedMultiplier)) {
+			world.puffle.setXVelocity(-(ROLL_SPEED * speedMultiplier));
 		}
 	}
 
@@ -220,13 +223,13 @@ public class PuffleHandler {
 		// increases speed when player is on a ice block
 		for (Block block : walkedOnBlocks) {
 			if (block != null && block.getBlockType().equals(BlockType.ICE)) {
-				ROLL_SPEED = 8f;
+				speedMultiplier = 3.0f;
 			} else {
-				// when not on ice speed is reduced
-				if (ROLL_SPEED > NORMAL_ROLL_SPEED) {
-					ROLL_SPEED -= 0.1f;
+				if(speedMultiplier > DEFAULT_SPEED_MULTIPLIER){ //decelerate
+					speedMultiplier -= 0.05f;
+				} else if(speedMultiplier < DEFAULT_SPEED_MULTIPLIER){ //accelerate
+					speedMultiplier += 0.05f;
 				}
-
 			}
 		}
 	}
