@@ -45,14 +45,12 @@ public class PuffleHandler {
 	
 	private World world;
 	private Array<Block> collidableBlocks;
-    private Array<Block> walkedOnBlocks;
 	private boolean grounded;
 	private int damageCooldown;
 
 	public PuffleHandler(World world) {
 		this.world = world;
 		collidableBlocks = new Array<Block>();
-        walkedOnBlocks = new Array<Block>();
 		this.grounded = true;
 		this.damageCooldown = 0;
 		resetKeys();
