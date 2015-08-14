@@ -130,8 +130,6 @@ public class PuffleHandler {
 
 		// store all blocks the puffle can collide with
 		findCollidableBlocks(tileBoundsOfPuffle);
-        //handles collitions with blocks below the player
-        checkUnderFootCollision(tileBoundsOfPuffle);
 		// simulate horizontal movement
 		puffleBounds.x += world.puffle.getVelocity().x;
 
@@ -184,6 +182,17 @@ public class PuffleHandler {
 					&& Intersector.overlaps(puffleBounds, block.getBounds())) {
 				if (world.puffle.getVelocity().y < 0) {
 					grounded = true;
+					//Allow blocks under puffle to effect speed
+					if (block.getBlockType().equals(BlockType.ICE)) {
+						speedMultiplier = 3.0f;
+					} else {
+						if(speedMultiplier > DEFAULT_SPEED_MULTIPLIER){ //decelerate
+							speedMultiplier -= 0.05f;
+						} else if(speedMultiplier < DEFAULT_SPEED_MULTIPLIER){ //accelerate
+							speedMultiplier += 0.05f;
+						}
+					}
+					
 				} else if (world.puffle.getVelocity().y > 0) {
 					if (damageCooldown == 0 && block.isBreakable()) {
 						// returns true if block is broken completely
@@ -216,34 +225,6 @@ public class PuffleHandler {
             }
         }
     }
-	
-	private void checkUnderFootCollision(TileBounds bounds) {
-		// finds block under player
-		findUnderfootBlocks(bounds);
-		// increases speed when player is on a ice block
-		for (Block block : walkedOnBlocks) {
-			if (block != null && block.getBlockType().equals(BlockType.ICE)) {
-				speedMultiplier = 3.0f;
-			} else {
-				if(speedMultiplier > DEFAULT_SPEED_MULTIPLIER){ //decelerate
-					speedMultiplier -= 0.05f;
-				} else if(speedMultiplier < DEFAULT_SPEED_MULTIPLIER){ //accelerate
-					speedMultiplier += 0.05f;
-				}
-			}
-		}
-	}
-    
-    private void findUnderfootBlocks(TileBounds bounds) {
-        walkedOnBlocks.clear();
-        for (int x = bounds.left; x <= bounds.right; x++) {
-                // if not outside of world
-                if (x >= 0 && x < world.level.getWidth()) {
-                    walkedOnBlocks.add(world.level.getBlock(x, bounds.bottom - 1));
-                }
-
-        }
-	}
 
 	// Events ----------------
 	public void leftPressed() {
