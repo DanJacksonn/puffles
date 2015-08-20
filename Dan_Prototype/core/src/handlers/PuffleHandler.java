@@ -11,7 +11,6 @@ import java.util.Map;
 import entities.impl.Block;
 import entities.impl.Puffle;
 import resources.BlockType;
-import resources.Bounds;
 import resources.TileBounds;
 import entities.impl.World;
 
@@ -25,12 +24,11 @@ public class PuffleHandler {
 	}
 	static Map<Keys, Boolean> keys = new HashMap<Keys, Boolean>();
     
-    private static final float ROLL_SPEED = 2.7f;
+    private static final float DEFAULT_ROLL_SPEED = 2.7f;
     private static final float DEFAULT_SPEED_MULTIPLIER = 1.0f;
-    private float speedMultiplier = DEFAULT_SPEED_MULTIPLIER;
     
 	private static final float ROLL_ACCELERATION = 15f;
-	private static final float FRICTION = 0.9f;
+	private static final float DEFAULT_FRICTION = 0.9f;
 	private static final float GRAVITY = -29f;
 	private static final float JUMP_SPEED = 9f;
 	private static final int DAMAGE_COOLDOWN_PERIOD = 18;
@@ -47,12 +45,16 @@ public class PuffleHandler {
 	private Array<Block> collidableBlocks;
 	private boolean grounded;
 	private int damageCooldown;
+    private float speedMultiplier;
+    private float friction;
 
 	public PuffleHandler(World world) {
 		this.world = world;
 		collidableBlocks = new Array<Block>();
 		this.grounded = true;
 		this.damageCooldown = 0;
+		this.speedMultiplier = DEFAULT_SPEED_MULTIPLIER;
+		this.friction = DEFAULT_FRICTION;
 		resetKeys();
 	}
 
@@ -88,15 +90,20 @@ public class PuffleHandler {
 	private void updateVelocity() {
 		if (!world.puffle.isAccelerating()) {
 			if (world.puffle.isMoving()) {
-				world.puffle.scaleVelocity(FRICTION, 1);
+				world.puffle.scaleVelocity(friction, 1);
 			} else {
 				world.puffle.setState(Puffle.State.STOPPED);
 			}
 		}
-		if (world.puffle.getVelocity().x > ROLL_SPEED * speedMultiplier) {
-			world.puffle.setXVelocity(ROLL_SPEED * speedMultiplier);
-		} else if (world.puffle.getVelocity().x < -(ROLL_SPEED * speedMultiplier)) {
-			world.puffle.setXVelocity(-(ROLL_SPEED * speedMultiplier));
+		limitSpeedOfPuffle();
+	}
+
+	private void limitSpeedOfPuffle() {
+		float maxVelocity = DEFAULT_ROLL_SPEED * speedMultiplier;
+		if (world.puffle.getVelocity().x > maxVelocity) {
+			world.puffle.setXVelocity(maxVelocity);
+		} else if (world.puffle.getVelocity().x < -maxVelocity) {
+			world.puffle.setXVelocity(-maxVelocity);
 		}
 	}
 
@@ -182,7 +189,8 @@ public class PuffleHandler {
 					grounded = true;
 					//Allow blocks under puffle to effect speed
 					if (block.getBlockType().equals(BlockType.ICE)) {
-						speedMultiplier = 3.0f;
+						speedMultiplier = 2.0f;
+						friction = 0.97f;
 					} else {
 						if(speedMultiplier > DEFAULT_SPEED_MULTIPLIER){ //decelerate
 							speedMultiplier -= 0.05f;
@@ -261,7 +269,6 @@ public class PuffleHandler {
 				grounded = false;
 			}
 		}
-
 		if (keys.get(Keys.LEFT)) {
 			// start moving puffle left
 			world.puffle.setState(Puffle.State.ROLLING);
